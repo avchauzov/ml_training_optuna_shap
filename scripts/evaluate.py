@@ -32,12 +32,13 @@ def optimize_hyperparameters(x_data, y_data, cv, hyperparameters, n_jobs, n_tria
 		space = generate_hyperparameter_space(task_name, model_name, optimization_type, trial, scoring, len(np.unique(y_data)), n_jobs)
 		
 		# Merge trial-specific hyperparameters with the provided ones
-		for key in hyperparameters.keys():
-			if key not in space:
-				space[key] = hyperparameters[key]
+		space.update({key: value for key, value in hyperparameters.items() if key not in space})
 		
 		# Apply pruning strategy and return the cross-validation score
-		return apply_pruning(x_data, y_data, cv, trial, space, scoring, best_score_list, patience, task_name, model_name)
+		mean_score, std_score = apply_pruning(x_data, y_data, cv, trial, space, scoring, best_score_list, patience, task_name, model_name)
+		
+		trial.set_user_attr('std_score', std_score)
+		return mean_score
 	
 	# Perform Optuna hyperparameter optimization
 	return perform_optuna_optimization(objective, hyperparameters, metrics, scoring, n_trials)

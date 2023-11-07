@@ -51,6 +51,47 @@ def select_important_features(x_data, train_error, test_error, to_use, metrics, 
 	return columns_to_select_list
 
 
+def process_data(_task, _model, _x_data, _y_data, train_index, test_index, _weight_adjustment, _scoring, _hyperparameters_dictionary, train_error, test_error, index_column, x_values, shap_values):
+	if _model == 'sgdlinear':
+		x_train, y_train, weight_train_list, metric_weight_train_list, x_test, y_test, weight_test_list, metric_weight_test_list = sgdmodel_split_and_weight_data(_x_data, _y_data, train_index, test_index, _weight_adjustment, _scoring, _task)
+	
+	elif _model == 'lightgbm':
+		x_train, y_train, weight_train_list, metric_weight_train_list, x_test, y_test, weight_test_list, metric_weight_test_list = lightgbm_split_and_weight_data(_x_data, _y_data, train_index, test_index, _weight_adjustment, _scoring, _task)
+	
+	else:
+		raise ValueError(f'Unknown model name: {_model}')
+	
+	if _task == 'regression':
+		model = sgdmodel_train_model(x_train, y_train, weight_train_list, _hyperparameters_dictionary, _task) if _model == 'sgdlinear' else lightgbm_train_model(x_train, y_train, weight_train_list, x_test, y_test, weight_test_list, _hyperparameters_dictionary, _task)
+		train_error.append(regression_calculate_prediction_error(x_train, y_train, model, metric_weight_train_list, _scoring))
+		test_error.append(regression_calculate_prediction_error(x_test, y_test, model, metric_weight_test_list, _scoring))
+		explainer = shap.LinearExplainer(model, x_train) if _model == 'sgdlinear' else shap.TreeExplainer(model)
+	elif _task == 'classification_binary':
+		model = sgdmodel_train_model(x_train, y_train, weight_train_list, _hyperparameters_dictionary, _task) if _model == 'sgdlinear' else lightgbm_train_model(x_train, y_train, weight_train_list, x_test, y_test, weight_test_list, _hyperparameters_dictionary, _task)
+		train_error.append(classification_binary_calculate_prediction_error(x_train, y_train, model, metric_weight_train_list, _scoring))
+		test_error.append(classification_binary_calculate_prediction_error(x_test, y_test, model, metric_weight_test_list, _scoring))
+		explainer = shap.LinearExplainer(model, x_train) if _model == 'sgdlinear' else shap.TreeExplainer(model)
+	elif _task == 'classification_multiclass':
+		model = sgdmodel_train_model(x_train, y_train, weight_train_list, _hyperparameters_dictionary, _task) if _model == 'sgdlinear' else lightgbm_train_model(x_train, y_train, weight_train_list, x_test, y_test, weight_test_list, _hyperparameters_dictionary, _task)
+		train_error.append(classification_multiclass_calculate_prediction_error(x_train, y_train, model, metric_weight_train_list, _scoring))
+		test_error.append(classification_multiclass_calculate_prediction_error(x_test, y_test, model, metric_weight_test_list, _scoring))
+		explainer = shap.LinearExplainer(model, x_train) if _model == 'sgdlinear' else shap.TreeExplainer(model)
+	
+	else:
+		raise ValueError(f'Unknown task name: {_task}')
+	
+	shap_sub_values = explainer.shap_values(x_test)
+	
+	if isinstance(shap_sub_values, list):
+		shap_sub_values = [shap_sub_values[y_test][index] for index, y_test in enumerate(y_test)]
+	
+	index_column.extend(test_index)
+	x_values.extend(x_test)
+	shap_values.extend(shap_sub_values)
+	
+	return index_column, x_values, shap_values
+
+
 def get_select_features(_x_data, _y_data, _cv, _hyperparameters_dictionary, _weight_adjustment, _drop_rate, _min_columns_to_keep, _scoring, _task, _model, _metric_dictionary):
 	if _x_data.shape[1] < _min_columns_to_keep:
 		return sorted(list(_x_data))
@@ -64,105 +105,7 @@ def get_select_features(_x_data, _y_data, _cv, _hyperparameters_dictionary, _wei
 		index_column, x_values, shap_values = [], [], []
 		for index, (train_index, test_index) in enumerate(_cv):
 			print('IterationCV {}/{}'.format(index + 1, len(_cv)))
-			
-			if _task == 'regression' and _model == 'sgdlinear':
-				x_train, y_train, weight_train_list, metric_weight_train_list, x_test, y_test, weight_test_list, metric_weight_test_list = sgdmodel_split_and_weight_data(_x_data[columns_to_select_list], _y_data, train_index, test_index, _weight_adjustment, _scoring, _task)
-				
-				model = sgdmodel_train_model(x_train, y_train, weight_train_list, _hyperparameters_dictionary, _task)
-				train_error.append(regression_calculate_prediction_error(x_train, y_train, model, metric_weight_train_list, _scoring))
-				test_error.append(regression_calculate_prediction_error(x_test, y_test, model, metric_weight_test_list, _scoring))
-				
-				explainer = shap.LinearExplainer(model, x_train)
-				shap_sub_values = explainer.shap_values(x_test)
-				
-				index_column.extend(test_index)
-				x_values.extend(x_test)
-				
-				shap_values.extend(shap_sub_values)
-			
-			elif _task == 'classification_binary' and _model == 'sgdlinear':
-				x_train, y_train, weight_train_list, metric_weight_train_list, x_test, y_test, weight_test_list, metric_weight_test_list = sgdmodel_split_and_weight_data(_x_data[columns_to_select_list], _y_data, train_index, test_index, _weight_adjustment, _scoring, _task)
-				
-				model = sgdmodel_train_model(x_train, y_train, weight_train_list, _hyperparameters_dictionary, _task)
-				train_error.append(classification_binary_calculate_prediction_error(x_train, y_train, model, metric_weight_train_list, _scoring))
-				test_error.append(classification_binary_calculate_prediction_error(x_test, y_test, model, metric_weight_test_list, _scoring))
-				
-				explainer = shap.LinearExplainer(model, x_train)
-				shap_sub_values = explainer.shap_values(x_test)
-				
-				index_column.extend(test_index)
-				x_values.extend(x_test)
-				
-				shap_values.extend(shap_sub_values)
-			
-			elif _task == 'regression' and _model == 'lightgbm':
-				x_train, y_train, weight_train_list, metric_weight_train_list, x_test, y_test, weight_test_list, metric_weight_test_list = lightgbm_split_and_weight_data(_x_data[columns_to_select_list], _y_data, train_index, test_index, _weight_adjustment, _scoring, _task)
-				
-				model = lightgbm_train_model(x_train, y_train, weight_train_list, x_test, y_test, weight_test_list, _hyperparameters_dictionary, _task)
-				train_error.append(regression_calculate_prediction_error(x_train, y_train, model, metric_weight_train_list, _scoring))
-				test_error.append(regression_calculate_prediction_error(x_test, y_test, model, metric_weight_test_list, _scoring))
-				
-				explainer = shap.TreeExplainer(model)
-				shap_sub_values = explainer.shap_values(x_test)
-				
-				index_column.extend(test_index)
-				x_values.extend(x_test)
-				
-				shap_values.extend(shap_sub_values)
-			
-			elif _task == 'classification_binary' and _model == 'lightgbm':
-				x_train, y_train, weight_train_list, metric_weight_train_list, x_test, y_test, weight_test_list, metric_weight_test_list = lightgbm_split_and_weight_data(_x_data[columns_to_select_list], _y_data, train_index, test_index, _weight_adjustment, _scoring, _task)
-				
-				model = lightgbm_train_model(x_train, y_train, weight_train_list, x_test, y_test, weight_test_list, _hyperparameters_dictionary, _task)
-				train_error.append(classification_binary_calculate_prediction_error(x_train, y_train, model, metric_weight_train_list, _scoring))
-				test_error.append(classification_binary_calculate_prediction_error(x_test, y_test, model, metric_weight_test_list, _scoring))
-				
-				explainer = shap.TreeExplainer(model)
-				shap_sub_values = explainer.shap_values(x_test)
-				
-				if isinstance(shap_sub_values, list):
-					shap_sub_values = [shap_sub_values[y_test][index] for index, y_test in enumerate(y_test)]
-				
-				index_column.extend(test_index)
-				x_values.extend(x_test)
-				
-				shap_values.extend(shap_sub_values)
-			
-			elif _task == 'classification_multiclass' and _model == 'sgdlinear':
-				x_train, y_train, weight_train_list, metric_weight_train_list, x_test, y_test, weight_test_list, metric_weight_test_list = sgdmodel_split_and_weight_data(_x_data[columns_to_select_list], _y_data, train_index, test_index, _weight_adjustment, _scoring, _task)
-				
-				model = sgdmodel_train_model(x_train, y_train, weight_train_list, _hyperparameters_dictionary, _task)
-				train_error.append(classification_multiclass_calculate_prediction_error(x_train, y_train, model, metric_weight_train_list, _scoring))
-				test_error.append(classification_multiclass_calculate_prediction_error(x_test, y_test, model, metric_weight_test_list, _scoring))
-				
-				explainer = shap.LinearExplainer(model, x_train)
-				shap_sub_values = explainer.shap_values(x_test)
-				
-				if isinstance(shap_sub_values, list):
-					shap_sub_values = [shap_sub_values[y_test][index] for index, y_test in enumerate(y_test)]
-				
-				index_column.extend(test_index)
-				x_values.extend(x_test)
-				
-				shap_values.extend(shap_sub_values)
-			
-			elif _task == 'classification_multiclass' and _model == 'lightgbm':
-				x_train, y_train, weight_train_list, metric_weight_train_list, x_test, y_test, weight_test_list, metric_weight_test_list = lightgbm_split_and_weight_data(_x_data[columns_to_select_list], _y_data, train_index, test_index, _weight_adjustment, _scoring, _task)
-				
-				model = lightgbm_train_model(x_train, y_train, weight_train_list, x_test, y_test, weight_test_list, _hyperparameters_dictionary, _task)
-				train_error.append(classification_multiclass_calculate_prediction_error(x_train, y_train, model, metric_weight_train_list, _scoring))
-				test_error.append(classification_multiclass_calculate_prediction_error(x_test, y_test, model, metric_weight_test_list, _scoring))
-				
-				explainer = shap.TreeExplainer(model)
-				shap_sub_values = explainer.shap_values(x_test)
-				
-				if isinstance(shap_sub_values, list):
-					shap_sub_values = [shap_sub_values[y_test][index] for index, y_test in enumerate(y_test)]
-				
-				index_column.extend(test_index)
-				x_values.extend(x_test)
-				
-				shap_values.extend(shap_sub_values)
+			process_data(_task, _model, _x_data[columns_to_select_list], _y_data, train_index, test_index, _weight_adjustment, _scoring, _hyperparameters_dictionary, train_error, test_error, index_column, x_values, shap_values)
 		
 		train_error_column.append(train_error)
 		test_error_column.append(test_error)

@@ -31,11 +31,12 @@ based on SHAP values, chosen for its efficiency. Furthermore, a 'patience' featu
 
 The project is actively in development, with planned enhancements that include:
 
-- Improving data preprocessing steps and including into optimization process.
-- Including sample_weights calculations for imbalanced regression datasets.
-- Add some other optimizers.
-- Improve feature selection.
-- Speed-up and fix calibration.
+- [x] optuna best model selection - improving logic + fixing issues
+- [ ] Improving data preprocessing steps and including into optimization process.
+- [ ] Including sample_weights calculations for imbalanced regression datasets.
+- [ ] Add some other optimizers.
+- [ ] Improve feature selection.
+- [ ] Speed-up and fix calibration.
 
 ## Acknowledgments
 
