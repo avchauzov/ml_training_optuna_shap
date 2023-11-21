@@ -1,10 +1,10 @@
 import numpy as np
 
 from scripts.train import apply_pruning, perform_optuna_optimization
-from utils.optimization_utils import generate_hyperparameter_space
+from utils.optimization import generate_hyperparameter_space
 
 
-def optimize_hyperparameters(x_data, y_data, cv, hyperparameters, n_jobs, n_trials, patience, scoring, optimization_type, task_name, model_name, metrics):
+def optimize_hyperparameters(x_data, y_data, weight_data, cv, hyperparameters, n_jobs, n_trials, patience, scoring, optimization_type, task_name, model_name, metrics):
 	"""
 	Perform hyperparameter optimization for a machine learning model.
 
@@ -35,7 +35,7 @@ def optimize_hyperparameters(x_data, y_data, cv, hyperparameters, n_jobs, n_tria
 		space.update({key: value for key, value in hyperparameters.items() if key not in space})
 		
 		# Apply pruning strategy and return the cross-validation score
-		mean_score, std_score = apply_pruning(x_data, y_data, cv, trial, space, scoring, best_score_list, patience, task_name, model_name)
+		mean_score, std_score = apply_pruning(x_data, y_data, weight_data, cv, trial, space, scoring, best_score_list, patience, task_name, model_name)
 		
 		trial.set_user_attr('std_score', std_score)
 		return mean_score

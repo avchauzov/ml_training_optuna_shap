@@ -1,11 +1,9 @@
 import lightgbm
 
-from data.preprocessing import preprocess_data_lightgbm
-from tasks.classification import compute_sample_weights as functions_classification_compute_sample_weights
-from tasks.regression import compute_sample_weights as functions_regression_compute_sample_weights
+from data.preprocessing import compute_sample_weights, preprocess_data_lightgbm
 
 
-def train_model(x_train, y_train, sample_weight_train, x_test, y_test, sample_weight_test, hyperparameters, task_name):
+def train_model(x_train, y_train, weight_train, x_test, y_test, weight_test, hyperparameters, task_name):
 	"""
 	Train a LightGBM model based on the specified task and hyperparameters.
 
@@ -33,9 +31,9 @@ def train_model(x_train, y_train, sample_weight_train, x_test, y_test, sample_we
 		if hyperparameters['boosting_type'] != 'dart':
 			model.fit(
 					x_train, y_train,
-					sample_weight=sample_weight_train,
+					sample_weight=weight_train,
 					eval_set=[(x_test, y_test), (x_train, y_train)],
-					eval_sample_weight=[sample_weight_test, sample_weight_train],
+					eval_sample_weight=[weight_test, weight_train],
 					eval_metric=hyperparameters['metric'],
 					callbacks=[
 							lightgbm.early_stopping(int(hyperparameters['n_estimators'] * 0.10), verbose=False),
@@ -45,9 +43,9 @@ def train_model(x_train, y_train, sample_weight_train, x_test, y_test, sample_we
 		else:
 			model.fit(
 					x_train, y_train,
-					sample_weight=sample_weight_train,
+					sample_weight=weight_train,
 					eval_set=[(x_test, y_test), (x_train, y_train)],
-					eval_sample_weight=[sample_weight_test, sample_weight_train],
+					eval_sample_weight=[weight_test, weight_train],
 					eval_metric=hyperparameters['metric'],
 					callbacks=[lightgbm.log_evaluation(period=-1, show_stdv=False)]
 					)
@@ -59,7 +57,7 @@ def train_model(x_train, y_train, sample_weight_train, x_test, y_test, sample_we
 		raise
 
 
-def split_and_weight_data(x_data, y_data, train_index, test_index, weighing, scoring, task_name):
+def split_and_weight_data(x_data, y_data, weight_data, train_index, test_index, weight_adjustment, scoring, task_name):
 	"""
 	Split the data and perform weighting based on the specified task and parameters.
 
@@ -75,12 +73,5 @@ def split_and_weight_data(x_data, y_data, train_index, test_index, weighing, sco
 	Returns:
 	- Split and optionally weighted data
 	"""
-	x_train, y_train, x_test, y_test = preprocess_data_lightgbm(x_data, y_data, train_index, test_index)
-	
-	if task_name == 'regression':
-		return functions_regression_compute_sample_weights(x_train, y_train, x_test, y_test, weighing, scoring)
-	elif task_name in ['classification_binary', 'classification_multiclass']:
-		return functions_classification_compute_sample_weights(x_train, y_train, x_test, y_test, weighing, scoring)
-	
-	# Handle other task types or return None if not applicable
-	return None
+	x_train, y_train, weight_train, x_test, y_test, weight_test = preprocess_data_lightgbm(x_data, y_data, weight_data, train_index, test_index)
+	return compute_sample_weights(x_train, y_train, weight_train, x_test, y_test, weight_test, weight_adjustment, scoring)

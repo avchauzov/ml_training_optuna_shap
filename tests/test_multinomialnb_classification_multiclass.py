@@ -14,7 +14,7 @@ for train_index, test_index in StratifiedKFold(n_splits=3, shuffle=True).split(x
 	cv.append((train_index, test_index))
 
 best_hyperparameters_dictionary, weight_adjustment = run_optimization(
-		task_name='classification_multiclass', model_name='multinomialnb', x_data=x_data, y_data=y_data, cv=cv, n_trials_long=32, n_trials_short=16, patience=8, scoring=('roc_auc_ovr', 'weighted'), calibration=None, n_jobs=16, drop_rate=0.50,
+		task_name='classification_multiclass', model_name='multinomialnb', x_data=x_data, y_data=y_data, weight_data=[1] * len(y_data), cv=cv, n_trials_long=32, n_trials_short=16, patience=8, scoring=('roc_auc_ovr', 'weighted'), calibration=None, n_jobs=16, drop_rate=0.50,
 		min_columns_to_keep=8
 		)
 

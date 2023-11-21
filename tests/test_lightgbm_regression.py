@@ -14,7 +14,7 @@ for train_index, test_index in KFold(n_splits=3, shuffle=True).split(x_data):
 	cv.append((train_index, test_index))
 
 best_hyperparameters_dictionary, weight_adjustment, important_features_list = run_optimization(
-		task_name='regression', model_name='lightgbm', x_data=x_data, y_data=y_data, cv=cv, n_trials_long=32, n_trials_short=16, patience=8, scoring=('neg_mean_squared_error', 'weighted'), calibration=None, n_jobs=16, drop_rate=0.50,
+		task_name='regression', model_name='lightgbm', x_data=x_data, y_data=y_data, weight_data=[1] * len(y_data), cv=cv, n_trials_long=32, n_trials_short=16, patience=8, scoring=('neg_mean_squared_error', 'weighted'), calibration=None, n_jobs=16, drop_rate=0.50,
 		min_columns_to_keep=8
 		)
 

@@ -37,7 +37,7 @@ def select_important_features(x_data, train_error, test_error, to_use, metrics, 
 	report_df['len_columns_to_use'] = [len(value) for value in to_use]
 	
 	# Determine the optimization direction (minimize or maximize)
-	direction = True if metrics.get(scoring) == 'minimize' else False
+	direction = True if metrics.get(scoring[0]) == 'minimize' else False
 	
 	# Sort the DataFrame based on error metrics and feature set length
 	report_df.sort_values(['test_error_mean', 'len_columns_to_use'], ascending=[direction, True], inplace=True)
@@ -46,39 +46,44 @@ def select_important_features(x_data, train_error, test_error, to_use, metrics, 
 	columns_to_select_list = sorted(report_df['columns_to_use'].values[0])
 	
 	# Print the report DataFrame for reference (optional)
-	print(report_df[['test_error_mean', 'len_columns_to_use']])
+	print(report_df[['train_error_mean', 'test_error_mean', 'len_columns_to_use']])
 	
 	return columns_to_select_list
 
 
-def process_data(_task, _model, _x_data, _y_data, train_index, test_index, _weight_adjustment, _scoring, _hyperparameters_dictionary, train_error, test_error, index_column, x_values, shap_values):
-	if _model == 'sgdlinear':
-		x_train, y_train, weight_train_list, metric_weight_train_list, x_test, y_test, weight_test_list, metric_weight_test_list = sgdmodel_split_and_weight_data(_x_data, _y_data, train_index, test_index, _weight_adjustment, _scoring, _task)
+def process_data(task_name, model_name, x_data, y_data, weight_data, train_index, test_index, weight_adjustment, scoring, hyperparameters, train_error, test_error, index_column, x_values, shap_values):
+	if model_name == 'sgdlinear':
+		x_train, y_train, weight_train_list, metric_weight_train_list, x_test, y_test, weight_test_list, metric_weight_test_list = sgdmodel_split_and_weight_data(x_data, y_data, weight_data, train_index, test_index, weight_adjustment, scoring, task_name)
+		model = sgdmodel_train_model(x_train, y_train, weight_train_list, hyperparameters, task_name)
 	
-	elif _model == 'lightgbm':
-		x_train, y_train, weight_train_list, metric_weight_train_list, x_test, y_test, weight_test_list, metric_weight_test_list = lightgbm_split_and_weight_data(_x_data, _y_data, train_index, test_index, _weight_adjustment, _scoring, _task)
-	
-	else:
-		raise ValueError(f'Unknown model name: {_model}')
-	
-	if _task == 'regression':
-		model = sgdmodel_train_model(x_train, y_train, weight_train_list, _hyperparameters_dictionary, _task) if _model == 'sgdlinear' else lightgbm_train_model(x_train, y_train, weight_train_list, x_test, y_test, weight_test_list, _hyperparameters_dictionary, _task)
-		train_error.append(regression_calculate_prediction_error(x_train, y_train, model, metric_weight_train_list, _scoring))
-		test_error.append(regression_calculate_prediction_error(x_test, y_test, model, metric_weight_test_list, _scoring))
-		explainer = shap.LinearExplainer(model, x_train) if _model == 'sgdlinear' else shap.TreeExplainer(model)
-	elif _task == 'classification_binary':
-		model = sgdmodel_train_model(x_train, y_train, weight_train_list, _hyperparameters_dictionary, _task) if _model == 'sgdlinear' else lightgbm_train_model(x_train, y_train, weight_train_list, x_test, y_test, weight_test_list, _hyperparameters_dictionary, _task)
-		train_error.append(classification_binary_calculate_prediction_error(x_train, y_train, model, metric_weight_train_list, _scoring))
-		test_error.append(classification_binary_calculate_prediction_error(x_test, y_test, model, metric_weight_test_list, _scoring))
-		explainer = shap.LinearExplainer(model, x_train) if _model == 'sgdlinear' else shap.TreeExplainer(model)
-	elif _task == 'classification_multiclass':
-		model = sgdmodel_train_model(x_train, y_train, weight_train_list, _hyperparameters_dictionary, _task) if _model == 'sgdlinear' else lightgbm_train_model(x_train, y_train, weight_train_list, x_test, y_test, weight_test_list, _hyperparameters_dictionary, _task)
-		train_error.append(classification_multiclass_calculate_prediction_error(x_train, y_train, model, metric_weight_train_list, _scoring))
-		test_error.append(classification_multiclass_calculate_prediction_error(x_test, y_test, model, metric_weight_test_list, _scoring))
-		explainer = shap.LinearExplainer(model, x_train) if _model == 'sgdlinear' else shap.TreeExplainer(model)
+	elif model_name == 'lightgbm':
+		x_train, y_train, weight_train_list, metric_weight_train_list, x_test, y_test, weight_test_list, metric_weight_test_list = lightgbm_split_and_weight_data(x_data, y_data, weight_data, train_index, test_index, weight_adjustment, scoring, task_name)
+		model = lightgbm_train_model(x_train, y_train, weight_train_list, x_test, y_test, weight_test_list, hyperparameters, task_name)
 	
 	else:
-		raise ValueError(f'Unknown task name: {_task}')
+		raise ValueError(f'Unknown model name: {model_name}')
+	
+	if task_name == 'regression':
+		train_error.append(regression_calculate_prediction_error(x_train, y_train, model, metric_weight_train_list, scoring))
+		test_error.append(regression_calculate_prediction_error(x_test, y_test, model, metric_weight_test_list, scoring))
+	
+	elif task_name == 'classification_binary':
+		train_error.append(classification_binary_calculate_prediction_error(x_train, y_train, model, metric_weight_train_list, scoring))
+		test_error.append(classification_binary_calculate_prediction_error(x_test, y_test, model, metric_weight_test_list, scoring))
+	
+	elif task_name == 'classification_multiclass':
+		train_error.append(classification_multiclass_calculate_prediction_error(x_train, y_train, model, metric_weight_train_list, scoring))
+		test_error.append(classification_multiclass_calculate_prediction_error(x_test, y_test, model, metric_weight_test_list, scoring))
+	
+	
+	else:
+		raise ValueError(f'Unknown task name: {task_name}')
+	
+	if model_name == 'sgdlinear':
+		explainer = shap.LinearExplainer(model, x_train)
+	
+	else:
+		explainer = shap.TreeExplainer(model)
 	
 	shap_sub_values = explainer.shap_values(x_test)
 	
@@ -88,24 +93,22 @@ def process_data(_task, _model, _x_data, _y_data, train_index, test_index, _weig
 	index_column.extend(test_index)
 	x_values.extend(x_test)
 	shap_values.extend(shap_sub_values)
-	
-	return index_column, x_values, shap_values
 
 
-def get_select_features(_x_data, _y_data, _cv, _hyperparameters_dictionary, _weight_adjustment, _drop_rate, _min_columns_to_keep, _scoring, _task, _model, _metric_dictionary):
-	if _x_data.shape[1] < _min_columns_to_keep:
-		return sorted(list(_x_data))
+def get_select_features(x_data, y_data, weight_data, cv, hyperparameters, weight_adjustment, drop_rate, min_columns_to_keep, scoring, task_name, model, metric_dictionary):
+	if x_data.shape[1] < min_columns_to_keep:
+		return sorted(list(x_data))
 	
-	columns_to_select_list, columns_to_drop_flatten_list, iteration = list(_x_data), [], 1
+	columns_to_select_list, columns_to_drop_flatten_list, iteration = list(x_data), [], 1
 	train_error_column, test_error_column, columns_to_use_column, columns_to_drop_column = [], [], [], []
 	while True:
 		print(f'Iteration {iteration}')
 		
 		train_error, test_error = [], []
 		index_column, x_values, shap_values = [], [], []
-		for index, (train_index, test_index) in enumerate(_cv):
-			print('IterationCV {}/{}'.format(index + 1, len(_cv)))
-			process_data(_task, _model, _x_data[columns_to_select_list], _y_data, train_index, test_index, _weight_adjustment, _scoring, _hyperparameters_dictionary, train_error, test_error, index_column, x_values, shap_values)
+		for index, (train_index, test_index) in enumerate(cv):
+			print('IterationCV {}/{}'.format(index + 1, len(cv)))
+			process_data(task_name, model, x_data[columns_to_select_list], y_data, weight_data, train_index, test_index, weight_adjustment, scoring, hyperparameters, train_error, test_error, index_column, x_values, shap_values)
 		
 		train_error_column.append(train_error)
 		test_error_column.append(test_error)
@@ -130,7 +133,7 @@ def get_select_features(_x_data, _y_data, _cv, _hyperparameters_dictionary, _wei
 		if shap_values_df.shape[0] == 0:
 			break
 		
-		drop_index = shap_values_df.shape[0] - int(np.ceil(shap_values_df.shape[0] * _drop_rate))
+		drop_index = shap_values_df.shape[0] - int(np.ceil(shap_values_df.shape[0] * drop_rate))
 		
 		if drop_index == 0:
 			drop_index += 1
@@ -138,7 +141,7 @@ def get_select_features(_x_data, _y_data, _cv, _hyperparameters_dictionary, _wei
 		columns_to_drop += shap_values_df[drop_index:].index.tolist()
 		columns_to_select_list = shap_values_df[: drop_index].index.tolist()
 		
-		if len(columns_to_select_list) < _min_columns_to_keep:
+		if len(columns_to_select_list) < min_columns_to_keep:
 			break
 		
 		print(f'Not important columns: {len(columns_to_drop)}')
@@ -150,4 +153,4 @@ def get_select_features(_x_data, _y_data, _cv, _hyperparameters_dictionary, _wei
 		columns_to_drop_flatten_list.extend(columns_to_drop)
 		iteration += 1
 	
-	return select_important_features(_x_data, train_error_column, test_error_column, columns_to_use_column, _metric_dictionary, _scoring)
+	return select_important_features(x_data, train_error_column, test_error_column, columns_to_use_column, metric_dictionary, scoring)

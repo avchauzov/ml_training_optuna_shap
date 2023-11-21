@@ -9,7 +9,7 @@ from tasks.classification_multiclass import calculate_prediction_error as classi
 from tasks.regression import calculate_prediction_error as regression_calculate_prediction_error
 
 
-def cross_validate_models(x_data, y_data, cv, hyperparameters, weighing, scoring, task_name, model_name):
+def cross_validate(x_data, y_data, weight_data, cv, hyperparameters, weight_adjustment, scoring, task_name, model_name):
 	"""
 	Perform cross-validation and compute error scores based on specified conditions and models.
 
@@ -29,52 +29,31 @@ def cross_validate_models(x_data, y_data, cv, hyperparameters, weighing, scoring
 	error = []
 	for train_index, test_index in cv:
 		
-		if task_name == 'regression' and model_name == 'sgdlinear':
-			x_train, y_train, weight_train_list, metric_weight_train_list, x_test, y_test, weight_test_list, metric_weight_test_list = sgdmodel_split_and_weight_data(x_data, y_data, train_index, test_index, weighing, scoring, task_name)
-			
-			model = sgdmodel_train_model(x_train, y_train, weight_train_list, hyperparameters, task_name)
-			error.append(regression_calculate_prediction_error(x_test, y_test, model, metric_weight_test_list, scoring))
+		if model_name == 'sgdlinear':
+			x_train, y_train, weight_train, weight_metric_train, x_test, y_test, weight_test, weight_metric_test = sgdmodel_split_and_weight_data(x_data, y_data, weight_data, train_index, test_index, weight_adjustment, scoring, task_name)
+			model = sgdmodel_train_model(x_train, y_train, weight_train, hyperparameters, task_name)
 		
-		elif task_name == 'classification_binary' and model_name == 'sgdlinear':
-			x_train, y_train, weight_train_list, metric_weight_train_list, x_test, y_test, weight_test_list, metric_weight_test_list = sgdmodel_split_and_weight_data(x_data, y_data, train_index, test_index, weighing, scoring, task_name)
-			
-			model = sgdmodel_train_model(x_train, y_train, weight_train_list, hyperparameters, task_name)
-			error.append(classification_binary_calculate_prediction_error(x_test, y_test, model, metric_weight_test_list, scoring))
+		elif model_name == 'lightgbm':
+			x_train, y_train, weight_train, weight_metric_train, x_test, y_test, weight_test, weight_metric_test = lightgbm_split_and_weight_data(x_data, y_data, weight_data, train_index, test_index, weight_adjustment, scoring, task_name)
+			model = lightgbm_train_model(x_train, y_train, weight_train, x_test, y_test, weight_test, hyperparameters, task_name)
 		
-		elif task_name == 'regression' and model_name == 'lightgbm':
-			x_train, y_train, weight_train_list, metric_weight_train_list, x_test, y_test, weight_test_list, metric_weight_test_list = lightgbm_split_and_weight_data(x_data, y_data, train_index, test_index, weighing, scoring, task_name)
-			
-			model = lightgbm_train_model(x_train, y_train, weight_train_list, x_test, y_test, weight_test_list, hyperparameters, task_name)
-			error.append(regression_calculate_prediction_error(x_test, y_test, model, metric_weight_test_list, scoring))
+		elif model_name == 'multinomialnb':
+			x_train, y_train, weight_train, weight_metric_train, x_test, y_test, weight_test, weight_metric_test = sgdmodel_split_and_weight_data(x_data, y_data, weight_data, train_index, test_index, weight_adjustment, scoring, task_name)
+			model = multinomialnb_train_model(x_train, y_train, weight_train, hyperparameters)
 		
-		elif task_name == 'classification_binary' and model_name == 'lightgbm':
-			x_train, y_train, weight_train_list, metric_weight_train_list, x_test, y_test, weight_test_list, metric_weight_test_list = lightgbm_split_and_weight_data(x_data, y_data, train_index, test_index, weighing, scoring, task_name)
-			
-			model = lightgbm_train_model(x_train, y_train, weight_train_list, x_test, y_test, weight_test_list, hyperparameters, task_name)
-			error.append(classification_binary_calculate_prediction_error(x_test, y_test, model, metric_weight_test_list, scoring))
+		if task_name == 'regression':
+			error.append(regression_calculate_prediction_error(x_test, y_test, model, weight_metric_test, scoring))
 		
-		elif task_name == 'classification_multiclass' and model_name == 'multinomialnb':
-			x_train, y_train, weight_train_list, metric_weight_train_list, x_test, y_test, weight_test_list, metric_weight_test_list = sgdmodel_split_and_weight_data(x_data, y_data, train_index, test_index, weighing, scoring, task_name)
-			
-			model = multinomialnb_train_model(x_train, y_train, weight_train_list, hyperparameters)
-			error.append(classification_multiclass_calculate_prediction_error(x_test, y_test, model, metric_weight_test_list, scoring))
+		elif task_name == 'classification_binary':
+			error.append(classification_binary_calculate_prediction_error(x_test, y_test, model, weight_metric_test, scoring))
 		
-		elif task_name == 'classification_multiclass' and model_name == 'sgdlinear':
-			x_train, y_train, weight_train_list, metric_weight_train_list, x_test, y_test, weight_test_list, metric_weight_test_list = sgdmodel_split_and_weight_data(x_data, y_data, train_index, test_index, weighing, scoring, task_name)
-			
-			model = sgdmodel_train_model(x_train, y_train, weight_train_list, hyperparameters, task_name)
-			error.append(classification_multiclass_calculate_prediction_error(x_test, y_test, model, metric_weight_test_list, scoring))
-		
-		elif task_name == 'classification_multiclass' and model_name == 'lightgbm':
-			x_train, y_train, weight_train_list, metric_weight_train_list, x_test, y_test, weight_test_list, metric_weight_test_list = lightgbm_split_and_weight_data(x_data, y_data, train_index, test_index, weighing, scoring, task_name)
-			
-			model = lightgbm_train_model(x_train, y_train, weight_train_list, x_test, y_test, weight_test_list, hyperparameters, task_name)
-			error.append(classification_multiclass_calculate_prediction_error(x_test, y_test, model, metric_weight_test_list, scoring))
+		elif task_name == 'classification_multiclass':
+			error.append(classification_multiclass_calculate_prediction_error(x_test, y_test, model, weight_metric_test, scoring))
 	
 	return np.nanmean(error), np.nanstd(error)
 
 
-def apply_pruning(x_data, y_data, cv, trial, space, scoring, best_score_list, patience, task_name, model_name):
+def apply_pruning(x_data, y_data, weight_data, cv, trial, space, scoring, best_score_list, patience, task_name, model_name):
 	"""
 	Apply pruning during an Optuna hyperparameter optimization process.
 
@@ -105,7 +84,7 @@ def apply_pruning(x_data, y_data, cv, trial, space, scoring, best_score_list, pa
 	
 	weight_adjustment = space.pop('weight_adjustment', None)
 	
-	return cross_validate_models(x_data, y_data, cv, space, weight_adjustment, scoring, task_name, model_name)
+	return cross_validate(x_data, y_data, weight_data, cv, space, weight_adjustment, scoring, task_name, model_name)
 
 
 def perform_optuna_optimization(objective_function, hyperparameters, metrics, scoring, n_trials):

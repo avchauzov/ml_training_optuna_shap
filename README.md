@@ -10,8 +10,8 @@ based on SHAP values, chosen for its efficiency. Furthermore, a 'patience' featu
 ## Key Features
 
 - Unsupervised model training to streamline machine learning model development.
-- Custom algorithm for feature selection using SHAP values.
 - Integration of 'patience' feature in Optuna for faster hyperparameter optimization.
+- Custom algorithm for feature selection using SHAP values.
 - Added calibration step to improve model performance for classification tasks.
 - Customizable and adaptable for different machine learning tasks and datasets.
 - Ongoing development with planned enhancements and improvements.
@@ -31,9 +31,10 @@ based on SHAP values, chosen for its efficiency. Furthermore, a 'patience' featu
 
 The project is actively in development, with planned enhancements that include:
 
-- [x] optuna best model selection - improving logic + fixing issues
+- [x] Optuna best model selection - improving logic + fixing issues
+- [x] Including sample_weights calculations for imbalanced regression datasets.
+- [ ] Feature selection - revision
 - [ ] Improving data preprocessing steps and including into optimization process.
-- [ ] Including sample_weights calculations for imbalanced regression datasets.
 - [ ] Add some other optimizers.
 - [ ] Improve feature selection.
 - [ ] Speed-up and fix calibration.

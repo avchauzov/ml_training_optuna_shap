@@ -8,10 +8,10 @@ from tasks.classification_binary import calculate_prediction_error as functions_
 from tasks.classification_multiclass import calculate_prediction_error as functions_classification_multiclass_calculate_prediction_error
 
 
-def get_calibration_error(_x_data, _y_data, _cv, _hyperparameters_dictionary, _weight_adjustment, _n_jobs, _scoring, _model_type, _space, _task):
+def get_calibration_error(_x_data, _y_data, weight_data, _cv, _hyperparameters_dictionary, _weight_adjustment, _n_jobs, _scoring, _model_type, _space, _task):
 	error_list = []
 	for train_index, test_index in _cv:
-		x_train, y_train, weight_train_list, metric_weight_train_list, x_test, y_test, weight_test_list, metric_weight_test_list = functions_lightgbm_split_and_weight_data(_x_data, _y_data, train_index, test_index, _weight_adjustment, _scoring, _task)
+		x_train, y_train, weight_train_list, metric_weight_train_list, x_test, y_test, weight_test_list, metric_weight_test_list = functions_lightgbm_split_and_weight_data(_x_data, _y_data, weight_data, train_index, test_index, _weight_adjustment, _scoring, _task)
 		model = functions_lightgbm_train_model(x_train, y_train, weight_train_list, x_test, y_test, weight_test_list, _hyperparameters_dictionary, _task)
 		
 		if _model_type == 'LogisticRegression':
@@ -45,7 +45,7 @@ def get_calibration_error(_x_data, _y_data, _cv, _hyperparameters_dictionary, _w
 	return np.nanmean(error_list)
 
 
-def get_calibration_model(x_data, y_data, cv, hyperparameters_dictionary, weight_adjustment, n_jobs, n_trials, scoring, metric_dictionary, task):
+def get_calibration_model(x_data, y_data, weight_data, cv, hyperparameters_dictionary, weight_adjustment, n_jobs, n_trials, scoring, metric_dictionary, task):
 	"""
 	Get the best calibration model based on optimization trials.
 
@@ -66,7 +66,7 @@ def get_calibration_model(x_data, y_data, cv, hyperparameters_dictionary, weight
 	"""
 	results_dictionary = {
 			'none': [get_calibration_error(
-					x_data, y_data, cv, hyperparameters_dictionary, weight_adjustment, n_jobs,
+					x_data, y_data, weight_data, cv, hyperparameters_dictionary, weight_adjustment, n_jobs,
 					scoring, 'none', {}, task
 					), {}]
 			}
@@ -82,7 +82,7 @@ def get_calibration_model(x_data, y_data, cv, hyperparameters_dictionary, weight
 				}
 		
 		return get_calibration_error(
-				x_data, y_data, cv, hyperparameters_dictionary, weight_adjustment, n_jobs,
+				x_data, y_data, weight_data, cv, hyperparameters_dictionary, weight_adjustment, n_jobs,
 				scoring, 'LogisticRegression', space, task
 				)
 	
