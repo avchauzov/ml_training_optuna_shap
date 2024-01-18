@@ -40,7 +40,6 @@ def preprocess_data_multinomialnb(x_data, y_data, weight_data, train_index, test
 	- Preprocessed training and testing data
 	"""
 	x_train, y_train, weight_train, x_test, y_test, weight_test = missing_values_removal(x_data, y_data, weight_data, train_index, test_index)
-	
 	return x_train, y_train, weight_train, x_test, y_test, weight_test
 
 

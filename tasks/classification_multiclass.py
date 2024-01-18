@@ -18,7 +18,7 @@ def calculate_error(y_list, prediction_list, weight_list=None, scoring=None):
 	"""
 	# Ensure y_list is one-hot encoded for appropriate metrics
 	if len(y_list.shape) == 1:
-		y_list = OneHotEncoder(sparse=False).fit_transform(y_list.reshape(-1, 1))
+		y_list = OneHotEncoder(sparse_output=False).fit_transform(y_list.reshape(-1, 1))
 	
 	if scoring is None:
 		return np.nan  # Handle the case of undefined scoring

@@ -34,7 +34,7 @@ def cross_validate(x_data, y_data, weight_data, cv, hyperparameters, weight_adju
 			model = sgdmodel_train_model(x_train, y_train, weight_train, hyperparameters, task_name)
 		
 		elif model_name == 'lightgbm':
-			x_train, y_train, weight_train, weight_metric_train, x_test, y_test, weight_test, weight_metric_test = lightgbm_split_and_weight_data(x_data, y_data, weight_data, train_index, test_index, weight_adjustment, scoring, task_name)
+			x_train, y_train, weight_train, weight_metric_train, x_test, y_test, weight_test, weight_metric_test = lightgbm_split_and_weight_data(x_data, y_data, weight_data, train_index, test_index, weight_adjustment, scoring)
 			model = lightgbm_train_model(x_train, y_train, weight_train, x_test, y_test, weight_test, hyperparameters, task_name)
 		
 		elif model_name == 'multinomialnb':

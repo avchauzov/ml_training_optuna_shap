@@ -57,7 +57,7 @@ def process_data(task_name, model_name, x_data, y_data, weight_data, train_index
 		model = sgdmodel_train_model(x_train, y_train, weight_train_list, hyperparameters, task_name)
 	
 	elif model_name == 'lightgbm':
-		x_train, y_train, weight_train_list, metric_weight_train_list, x_test, y_test, weight_test_list, metric_weight_test_list = lightgbm_split_and_weight_data(x_data, y_data, weight_data, train_index, test_index, weight_adjustment, scoring, task_name)
+		x_train, y_train, weight_train_list, metric_weight_train_list, x_test, y_test, weight_test_list, metric_weight_test_list = lightgbm_split_and_weight_data(x_data, y_data, weight_data, train_index, test_index, weight_adjustment, scoring)
 		model = lightgbm_train_model(x_train, y_train, weight_train_list, x_test, y_test, weight_test_list, hyperparameters, task_name)
 	
 	else:

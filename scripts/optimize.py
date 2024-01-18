@@ -42,7 +42,7 @@ def run_optimization(task_name, model_name, x_data, y_data, weight_data, cv, n_t
 		raise Exception('Optimization failed: too few iterations')
 	
 	if task_name == 'classification_multiclass' and model_name == 'multinomialnb':
-		return best_hyperparameters_dictionary, weight_adjustment
+		return best_hyperparameters_dictionary, weight_adjustment, list(x_data)
 	
 	print('Step 2: Feature selection')
 	important_features_list = get_select_features(
