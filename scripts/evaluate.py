@@ -4,7 +4,7 @@ from scripts.train import apply_pruning, perform_optuna_optimization
 from utils.optimization import generate_hyperparameter_space
 
 
-def optimize_hyperparameters(x_data, y_data, weight_data, cv, hyperparameters, n_jobs, n_trials, patience, scoring, optimization_type, task_name, model_name, metrics):
+def optimize_hyperparameters(x_data, y_data, weight_data, cv, hyperparameters, n_jobs, n_trials, patience, scoring, optimization_type, task_name, model_name, metrics, test):
 	"""
 	Perform hyperparameter optimization for a machine learning model.
 
@@ -29,7 +29,7 @@ def optimize_hyperparameters(x_data, y_data, weight_data, cv, hyperparameters, n
 	
 	def objective(trial):
 		# Generate hyperparameter space for the current trial
-		space = generate_hyperparameter_space(task_name, model_name, optimization_type, trial, scoring, len(np.unique(y_data)), n_jobs)
+		space = generate_hyperparameter_space(task_name, model_name, optimization_type, trial, scoring, len(np.unique(y_data)), n_jobs, test)
 		
 		# Merge trial-specific hyperparameters with the provided ones
 		space.update({key: value for key, value in hyperparameters.items() if key not in space})

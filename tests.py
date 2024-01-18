@@ -28,7 +28,7 @@ def generate_data_and_split(classification=True, n_classes=2):
 def run_optimization_for_test(task_name, model_name, x_data, y_data, cv, scoring):
 	best_hyperparameters_dictionary, weight_adjustment, important_features_list = run_optimization(
 			task_name=task_name, model_name=model_name, x_data=x_data, y_data=y_data, weight_data=[1] * len(y_data),
-			cv=cv, n_trials_long=32, n_trials_short=16, patience=8, scoring=scoring, calibration=None, n_jobs=16
+			cv=cv, n_trials_long=32, n_trials_short=16, patience=8, scoring=scoring, calibration=None, n_jobs=16, test=True
 			)
 	
 	assert weight_adjustment in [True, False]

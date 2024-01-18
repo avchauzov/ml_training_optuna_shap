@@ -32,7 +32,7 @@ def get_metric_dictionary(task_name):
 				}
 
 
-def generate_hyperparameter_space(task_name, model_name, _type, trial, scoring, num_class, n_jobs):
+def generate_hyperparameter_space(task_name, model_name, _type, trial, scoring, num_class, n_jobs, test):
 	"""
 	Generates a hyperparameter search space based on the task, model, and other parameters.
 
@@ -51,7 +51,7 @@ def generate_hyperparameter_space(task_name, model_name, _type, trial, scoring, 
 	if task_name == 'classification_binary':
 		if model_name == 'lightgbm':
 			if _type == 'long':
-				return {
+				parameters = {
 						'num_leaves'       : trial.suggest_int('num_leaves', 2, 1024, step=1),
 						'max_depth'        : trial.suggest_int('max_depth', 2, 16, step=1),
 						'min_child_samples': trial.suggest_int('min_child_samples', 2, 1024, step=1),
@@ -78,9 +78,14 @@ def generate_hyperparameter_space(task_name, model_name, _type, trial, scoring, 
 						
 						'n_jobs'           : trial.suggest_categorical('n_jobs', [n_jobs]),
 						'verbosity'        : trial.suggest_categorical('verbosity', [-1]),
-						'device'           : trial.suggest_categorical('device', ['gpu']),
-						'gpu_use_dp'       : trial.suggest_categorical('gpu_use_dp', [False]),
 						}
+				
+				if not test:
+					parameters['device'] = trial.suggest_categorical('device', ['gpu'])
+					parameters['gpu_use_dp'] = trial.suggest_categorical('gpu_use_dp', [False])
+				
+				return parameters
+			
 			else:
 				return {
 						'n_estimators' : trial.suggest_int('n_estimators', 64, 1024, step=1),
@@ -91,7 +96,7 @@ def generate_hyperparameter_space(task_name, model_name, _type, trial, scoring, 
 		if model_name == 'lightgbm':
 			objective_list = ['multiclass'] if scoring in ['roc_auc_ovr', 'roc_auc_ova'] else ['multiclass', 'multiclassova']
 			if _type == 'long':
-				return {
+				parameters = {
 						'num_leaves'       : trial.suggest_int('num_leaves', 2, 1024),
 						'max_depth'        : trial.suggest_int('max_depth', 2, 16),
 						'min_child_samples': trial.suggest_int('min_child_samples', 2, 1024),
@@ -119,9 +124,14 @@ def generate_hyperparameter_space(task_name, model_name, _type, trial, scoring, 
 						
 						'n_jobs'           : trial.suggest_categorical('n_jobs', [n_jobs]),
 						'verbosity'        : trial.suggest_categorical('verbosity', [-1]),
-						'device'           : trial.suggest_categorical('device', ['gpu']),
-						'gpu_use_dp'       : trial.suggest_categorical('gpu_use_dp', [False]),
 						}
+				
+				if not test:
+					parameters['device'] = trial.suggest_categorical('device', ['gpu'])
+					parameters['gpu_use_dp'] = trial.suggest_categorical('gpu_use_dp', [False])
+				
+				return parameters
+			
 			else:
 				return {
 						'n_estimators' : trial.suggest_int('n_estimators', 64, 1024),
@@ -131,7 +141,7 @@ def generate_hyperparameter_space(task_name, model_name, _type, trial, scoring, 
 	if task_name == 'regression':
 		if model_name == 'lightgbm':
 			if _type == 'long':
-				return {
+				parameters = {
 						'num_leaves'       : trial.suggest_int('num_leaves', 2, 1024),
 						'max_depth'        : trial.suggest_int('max_depth', 2, 16),
 						'min_child_samples': trial.suggest_int('min_child_samples', 2, 1024),
@@ -164,9 +174,14 @@ def generate_hyperparameter_space(task_name, model_name, _type, trial, scoring, 
 						
 						'n_jobs'           : trial.suggest_categorical('n_jobs', [n_jobs]),
 						'verbosity'        : trial.suggest_categorical('verbosity', [-1]),
-						'device'           : trial.suggest_categorical('device', ['gpu']),
-						'gpu_use_dp'       : trial.suggest_categorical('gpu_use_dp', [False]),
 						}
+				
+				if not test:
+					parameters['device'] = trial.suggest_categorical('device', ['gpu'])
+					parameters['gpu_use_dp'] = trial.suggest_categorical('gpu_use_dp', [False])
+				
+				return parameters
+			
 			else:
 				return {
 						'n_estimators' : trial.suggest_int('n_estimators', 64, 1024),
