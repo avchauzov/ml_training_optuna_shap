@@ -43,4 +43,4 @@ jobs:
         key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements.txt') }}
     - name: Test with pytest
       run: |
-        pytest tests/
+        pytest tests.py
