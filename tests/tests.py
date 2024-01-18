@@ -1,6 +1,13 @@
+import os
+import sys
+
 import pandas as pd
 from sklearn.datasets import make_classification, make_regression
 from sklearn.model_selection import KFold, StratifiedKFold
+
+
+main_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, main_folder)
 
 from scripts.optimize import run_optimization
 
