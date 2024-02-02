@@ -156,19 +156,19 @@ def generate_hyperparameter_space(task_name, model_name, _type, trial, scoring, 
 	
 	parameters = {}
 	if (task_name, model_name, _type) == ('classification_binary', 'lightgbm', 'long'):
-		parameters = implement_lightgbm_production_mode(lightgbm_long_parameters(trial, ['binary'], ['auc', 'average_precision', 'binary_logloss'], 1, n_jobs), trial)
+		parameters = lightgbm_long_parameters(trial, ['binary'], ['auc', 'average_precision', 'binary_logloss'], 1, n_jobs),
 	
 	elif (task_name, model_name, _type) == ('classification_binary', 'lightgbm', 'short'):
 		parameters = lightgbm_short_parameters(trial)
 	
 	elif (task_name, model_name, _type) == ('classification_multiclass', 'lightgbm', 'long'):
-		parameters = implement_lightgbm_production_mode(lightgbm_long_parameters(trial, ['multiclass'] if scoring in ['roc_auc_ovr', 'roc_auc_ova'] else ['multiclass', 'multiclassova'], ['auc_mu', 'multi_logloss', 'multi_error'], num_class, n_jobs), trial)
+		parameters = lightgbm_long_parameters(trial, ['multiclass'] if scoring in ['roc_auc_ovr', 'roc_auc_ova'] else ['multiclass', 'multiclassova'], ['auc_mu', 'multi_logloss', 'multi_error'], num_class, n_jobs)
 	
 	elif (task_name, model_name, _type) == ('classification_multiclass', 'lightgbm', 'short'):
 		parameters = lightgbm_short_parameters(trial)
 	
 	elif (task_name, model_name, _type) == ('regression', 'lightgbm', 'long'):
-		parameters = implement_lightgbm_production_mode(lightgbm_long_parameters(trial, ['regression', 'regression_l1', 'huber', 'fair', 'quantile', 'mape'], ['l1', 'l2', 'rmse', 'quantile', 'mape', 'huber', 'fair', 'poisson', 'tweedie'], 1, n_jobs), trial)
+		parameters = lightgbm_long_parameters(trial, ['regression', 'regression_l1', 'huber', 'fair', 'quantile', 'mape'], ['l1', 'l2', 'rmse', 'quantile', 'mape', 'huber', 'fair', 'poisson', 'tweedie'], 1, n_jobs),
 	
 	elif (task_name, model_name, _type) == ('regression', 'lightgbm', 'short'):
 		parameters = lightgbm_short_parameters(trial)
@@ -198,5 +198,8 @@ def generate_hyperparameter_space(task_name, model_name, _type, trial, scoring, 
 				'weight_adjustment': trial.suggest_categorical('weight_adjustment', [True, False]),
 				'alpha'            : trial.suggest_float('alpha', 1e-6, 128.0, step=0.1),
 				}
+	
+	if not test and model_name == 'lightgbm' and _type == 'long':
+		parameters = implement_lightgbm_production_mode(parameters, trial)
 	
 	return parameters
