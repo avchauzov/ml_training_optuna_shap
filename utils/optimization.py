@@ -156,7 +156,7 @@ def generate_hyperparameter_space(task_name, model_name, _type, trial, scoring, 
 	
 	parameters = {}
 	if (task_name, model_name, _type) == ('classification_binary', 'lightgbm', 'long'):
-		parameters = lightgbm_long_parameters(trial, ['binary'], ['auc', 'average_precision', 'binary_logloss'], 1, n_jobs),
+		parameters = lightgbm_long_parameters(trial, ['binary'], ['auc', 'average_precision', 'binary_logloss'], 1, n_jobs)
 	
 	elif (task_name, model_name, _type) == ('classification_binary', 'lightgbm', 'short'):
 		parameters = lightgbm_short_parameters(trial)
