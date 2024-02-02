@@ -77,10 +77,10 @@ def test_multinomialnb_classification_multiclass():
 	run_optimization_for_test('classification_multiclass', 'multinomialnb', x_data, y_data, cv, ('roc_auc_ovr', 'weighted'))
 
 
-test_lightgbm_classification_binary()
+'''test_lightgbm_classification_binary()
 test_lightgbm_classification_multiclass()
 test_lightgbm_regression()
 test_sgdlinear_classification_binary()
 test_sgdlinear_classification_multiclass()
 test_sgdlinear_regression()
-test_multinomialnb_classification_multiclass()
+test_multinomialnb_classification_multiclass()'''
