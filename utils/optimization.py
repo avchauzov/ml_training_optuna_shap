@@ -168,7 +168,7 @@ def generate_hyperparameter_space(task_name, model_name, _type, trial, scoring, 
 		parameters = lightgbm_short_parameters(trial)
 	
 	elif (task_name, model_name, _type) == ('regression', 'lightgbm', 'long'):
-		parameters = lightgbm_long_parameters(trial, ['regression', 'regression_l1', 'huber', 'fair', 'quantile', 'mape'], ['l1', 'l2', 'rmse', 'quantile', 'mape', 'huber', 'fair', 'poisson', 'tweedie'], 1, n_jobs),
+		parameters = lightgbm_long_parameters(trial, ['regression', 'regression_l1', 'huber', 'fair', 'quantile', 'mape'], ['l1', 'l2', 'rmse', 'quantile', 'mape', 'huber', 'fair', 'poisson', 'tweedie'], 1, n_jobs)
 	
 	elif (task_name, model_name, _type) == ('regression', 'lightgbm', 'short'):
 		parameters = lightgbm_short_parameters(trial)
