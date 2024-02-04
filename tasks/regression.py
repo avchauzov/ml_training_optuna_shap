@@ -1,10 +1,9 @@
 import numpy as np
-from sklearn.metrics import mean_absolute_error, mean_squared_error
 
-from utils.metrics import symmetrical_mape
+from tasks.metrics import calculate_metric
 
 
-def calculate_error(y_list, prediction_list, weight_list=None, scoring=None):
+def calculate_error(y_true, y_pred, sample_weight=None, scoring=None):
 	"""
 	Calculate error based on the specified scoring method.
 
@@ -20,19 +19,10 @@ def calculate_error(y_list, prediction_list, weight_list=None, scoring=None):
 	if scoring is None:
 		return np.nan  # Handle the case of undefined scoring
 	
-	if weight_list is None:
-		weight_list = np.ones(len(y_list))  # Default weights are all ones
+	if sample_weight is None:
+		sample_weight = np.ones(len(y_true))  # Default weights are all ones
 	
-	if scoring[0] == 'neg_mean_absolute_error':
-		return mean_absolute_error(y_list, prediction_list, sample_weight=weight_list)
-	
-	elif scoring[0] == 'neg_mean_squared_error':
-		return mean_squared_error(y_list, prediction_list, sample_weight=weight_list)
-	
-	elif scoring[0] == 'sMAPE':
-		return symmetrical_mape(y_list, prediction_list, sample_weight=weight_list)
-	
-	return np.nan  # Handle unknown or unsupported scoring methods
+	return calculate_metric(scoring, y_true, y_pred, sample_weight=sample_weight)
 
 
 def calculate_prediction_error(x_test, y_test, model, sample_weight=None, scoring=None):

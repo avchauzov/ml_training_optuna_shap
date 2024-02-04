@@ -1,9 +1,10 @@
 import numpy as np
-from sklearn.metrics import average_precision_score, brier_score_loss, log_loss, roc_auc_score
 from sklearn.preprocessing import OneHotEncoder
 
+from tasks.metrics import calculate_metric
 
-def calculate_error(y_list, prediction_list, weight_list=None, scoring=None):
+
+def calculate_error(y_true, y_pred, sample_weight=None, scoring=None):
 	"""
 	Calculate classification error based on the specified scoring method.
 
@@ -17,28 +18,16 @@ def calculate_error(y_list, prediction_list, weight_list=None, scoring=None):
 	- Calculated classification error using the specified scoring method
 	"""
 	# Ensure y_list is one-hot encoded for appropriate metrics
-	if len(y_list.shape) == 1:
-		y_list = OneHotEncoder(sparse_output=False).fit_transform(y_list.reshape(-1, 1))
+	if len(y_true.shape) == 1:
+		y_true = OneHotEncoder(sparse_output=False).fit_transform(y_true.reshape(-1, 1))
 	
 	if scoring is None:
 		return np.nan  # Handle the case of undefined scoring
 	
-	if weight_list is None:
-		weight_list = np.ones(len(y_list))  # Default weights are all ones
+	if sample_weight is None:
+		sample_weight = np.ones(len(y_true))  # Default weights are all ones
 	
-	if scoring[0] == 'average_precision':
-		return average_precision_score(y_list, prediction_list, sample_weight=weight_list)
-	
-	elif scoring[0] == 'neg_brier_score':
-		return brier_score_loss(y_list, prediction_list, sample_weight=weight_list)
-	
-	elif scoring[0] == 'neg_log_loss':
-		return log_loss(y_list, prediction_list, sample_weight=weight_list)
-	
-	elif scoring[0] == 'roc_auc':
-		return roc_auc_score(y_list, prediction_list, sample_weight=weight_list)
-	
-	return np.nan  # Handle unknown or unsupported scoring methods
+	return calculate_metric(scoring, y_true, y_pred, sample_weight=sample_weight)
 
 
 def calculate_prediction_error(x_test, y_test, model, sample_weight=None, scoring=None):
