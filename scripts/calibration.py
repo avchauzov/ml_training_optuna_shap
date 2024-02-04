@@ -2,10 +2,10 @@ import numpy as np
 import optuna
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import OneHotEncoder
-
-from models._lightgbm import split_and_weight_data as functions_lightgbm_split_and_weight_data, train_model as functions_lightgbm_train_model
 from tasks.classification_binary import calculate_prediction_error as functions_classification_binary_calculate_prediction_error
 from tasks.classification_multiclass import calculate_prediction_error as functions_classification_multiclass_calculate_prediction_error
+
+from models._lightgbm import split_and_weight_data as functions_lightgbm_split_and_weight_data, train_model as functions_lightgbm_train_model
 
 
 def get_calibration_error(_x_data, _y_data, weight_data, _cv, _hyperparameters_dictionary, _weight_adjustment, _n_jobs, _scoring, _model_type, _space, _task):

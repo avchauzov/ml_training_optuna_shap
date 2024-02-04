@@ -9,10 +9,10 @@ from sklearn.metrics import (
 	)
 from sklearn.preprocessing import OneHotEncoder
 
-from utils.metrics import symmetrical_mape
+from utils.custom_metrics import symmetrical_mape
 
 
-def calculate_test_error(data, model, problem_type, sample_weight=None, scoring=None):
+def calculate_test_error(data, model, sample_weight, scoring, problem_type):
 	x_test, y_test = data
 	
 	if sample_weight is None:
@@ -23,17 +23,17 @@ def calculate_test_error(data, model, problem_type, sample_weight=None, scoring=
 	else:
 		predictions = model.predict_proba(x_test)
 	
-	return calculate_error(y_test, predictions, problem_type, sample_weight, scoring)
+	return calculate_error(y_test, predictions, sample_weight, scoring, problem_type)
 
 
-def calculate_error(y_true, y_pred, problem_type, sample_weight=None, scoring=None):
+def calculate_error(y_true, y_pred, sample_weight, scoring, problem_type):
 	if problem_type not in ['regression'] and len(y_true.shape) == 1:
 		y_true = OneHotEncoder(sparse_output=False).fit_transform(y_true)
 	
-	return calculate_metric(scoring, y_true, y_pred, sample_weight=sample_weight)
+	return calculate_metric(y_true, y_pred, sample_weight, scoring)
 
 
-def calculate_metric(scoring, y_true, y_pred, sample_weight=None):
+def calculate_metric(y_true, y_pred, sample_weight, scoring):
 	metrics = {
 			'neg_mean_absolute_error': mean_absolute_error,
 			'neg_mean_squared_error' : mean_squared_error,
@@ -48,6 +48,6 @@ def calculate_metric(scoring, y_true, y_pred, sample_weight=None):
 	
 	if scoring[0] in metrics:
 		metric_function = metrics[scoring[0]]
-		return metric_function(y_true, y_pred, sample_weight=sample_weight)
+		return metric_function(y_true, y_pred, sample_weight)
 	
 	raise ValueError(f'Error: Metric "{scoring[0]}" is not defined. Please add it to tasks -> functions.py -> calculate_metric(...) -> metrics variable!')

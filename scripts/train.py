@@ -1,12 +1,12 @@
 import numpy as np
 import optuna
+from tasks.classification_binary import calculate_prediction_error as classification_binary_calculate_prediction_error
+from tasks.classification_multiclass import calculate_prediction_error as classification_multiclass_calculate_prediction_error
+from tasks.regression import calculate_prediction_error as regression_calculate_prediction_error
 
 from models._lightgbm import split_and_weight_data as lightgbm_split_and_weight_data, train_model as lightgbm_train_model
 from models._multinomialnb import train_model as multinomialnb_train_model
 from models._sgdlinear import split_and_weight_data as sgdmodel_split_and_weight_data, train_model as sgdmodel_train_model
-from tasks.classification_binary import calculate_prediction_error as classification_binary_calculate_prediction_error
-from tasks.classification_multiclass import calculate_prediction_error as classification_multiclass_calculate_prediction_error
-from tasks.regression import calculate_prediction_error as regression_calculate_prediction_error
 
 
 def cross_validate(x_data, y_data, weight_data, cv, hyperparameters, weight_adjustment, scoring, task_name, model_name):

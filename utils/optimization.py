@@ -1,35 +1,3 @@
-def get_metric_dictionary(task_name):
-	if task_name == 'regression':
-		return {
-				'neg_mean_absolute_error': 'minimize',
-				'neg_mean_squared_error' : 'minimize',
-				'sMAPE'                  : 'minimize',
-				}
-	
-	metric_dictionary = {
-			'average_precision': 'maximize',
-			'neg_log_loss'     : 'minimize'
-			}
-	
-	if task_name == 'classification_binary':
-		metric_dictionary.update(
-				{
-						'neg_brier_score': 'minimize',
-						'roc_auc'        : 'maximize',
-						}
-				)
-	
-	elif task_name == 'classification_multiclass':
-		metric_dictionary.update(
-				{
-						'roc_auc_ova': 'maximize',
-						'roc_auc_ovr': 'maximize',
-						}
-				)
-	
-	return metric_dictionary
-
-
 def implement_lightgbm_production_mode(parameters, trial):
 	parameters['device'] = trial.suggest_categorical('device', ['gpu'])
 	parameters['gpu_use_dp'] = trial.suggest_categorical('gpu_use_dp', [False])
@@ -49,7 +17,7 @@ def lightgbm_long_parameters(trial, objective, metric, num_class, n_jobs):
 			'n_estimators'     : trial.suggest_int('n_estimators', 128, 128),
 			
 			'extra_trees'      : trial.suggest_categorical('extra_trees', [True, False]),
-			'boosting_type'    : trial.suggest_categorical('boosting_type', ['gbdt', 'dart', 'rf']),  # 'goss'
+			'boosting_type'    : trial.suggest_categorical('boosting_type', ['gbdt', 'dart', 'rf']),
 			'objective'        : trial.suggest_categorical('objective', objective),
 			'metric'           : trial.suggest_categorical('metric', metric),
 			'weight_adjustment': trial.suggest_categorical('weight_adjustment', [True, False]),
