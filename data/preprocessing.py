@@ -3,7 +3,22 @@ import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 
 
-def preprocess_data_sgdlinear(x_data, y_data, weight_data, train_index, test_index):
+def create_train_test_sets(data, index):
+	x_data, y_data, weight_data = data
+	train_index, test_index = index
+	
+	x_train = pd.DataFrame(x_data.values[train_index])
+	y_train = y_data[train_index]
+	weight_train = weight_data[train_index]
+	
+	x_test = pd.DataFrame(x_data.values[test_index])
+	y_test = y_data[test_index]
+	weight_test = weight_data[test_index]
+	
+	return x_train, y_train, weight_train, x_test, y_test, weight_test
+
+
+def preprocess_data_sgdlinear(data, index):
 	"""
 	Preprocess the input data for machine learning.
 
@@ -16,7 +31,7 @@ def preprocess_data_sgdlinear(x_data, y_data, weight_data, train_index, test_ind
 	Returns:
 	- Preprocessed training and testing data
 	"""
-	x_train, y_train, weight_train, x_test, y_test, weight_test = missing_values_removal(x_data, y_data, weight_data, train_index, test_index)
+	x_train, y_train, weight_train, x_test, y_test, weight_test = create_train_test_sets(data, index)
 	
 	# Scale the features using Min-Max scaling
 	scaler = MinMaxScaler((0.1, 0.9))
@@ -26,7 +41,7 @@ def preprocess_data_sgdlinear(x_data, y_data, weight_data, train_index, test_ind
 	return x_train, y_train, weight_train, x_test, y_test, weight_test
 
 
-def preprocess_data_multinomialnb(x_data, y_data, weight_data, train_index, test_index):
+def preprocess_data_multinomialnb(data, index):
 	"""
 	Preprocess the input data for machine learning.
 
@@ -39,11 +54,10 @@ def preprocess_data_multinomialnb(x_data, y_data, weight_data, train_index, test
 	Returns:
 	- Preprocessed training and testing data
 	"""
-	x_train, y_train, weight_train, x_test, y_test, weight_test = missing_values_removal(x_data, y_data, weight_data, train_index, test_index)
-	return x_train, y_train, weight_train, x_test, y_test, weight_test
+	return create_train_test_sets(data, index)
 
 
-def preprocess_data_lightgbm(x_data, y_data, weight_data, train_index, test_index):
+def preprocess_data_lightgbm(data, index):
 	"""
 	Preprocess the input data for machine learning.
 
@@ -56,9 +70,7 @@ def preprocess_data_lightgbm(x_data, y_data, weight_data, train_index, test_inde
 	Returns:
 	- Preprocessed training and testing data
 	"""
-	# Split the data into training and testing sets
-	x_train, y_train, weight_train = pd.DataFrame(x_data.values[train_index]), y_data[train_index], weight_data[train_index]
-	x_test, y_test, weight_test = pd.DataFrame(x_data.values[test_index]), y_data[test_index], weight_data[test_index]
+	x_train, y_train, weight_train, x_test, y_test, weight_test = create_train_test_sets(data, index)
 	
 	# Drop columns with all NaN values
 	x_train = x_train.dropna(how='all', axis=1)
@@ -72,7 +84,7 @@ def preprocess_data_lightgbm(x_data, y_data, weight_data, train_index, test_inde
 	return x_train, y_train, weight_train, x_test, y_test, weight_test
 
 
-def compute_sample_weights(x_train, y_train, weight_train, x_test, y_test, weight_test, weighing, scoring):
+def compute_sample_weights(train_data, test_data, weighing, scoring):
 	"""
 	Compute sample weights for training and test data based on specified conditions.
 
@@ -87,6 +99,9 @@ def compute_sample_weights(x_train, y_train, weight_train, x_test, y_test, weigh
 	Returns:
 	- Training and test data along with computed sample weights
 	"""
+	x_train, y_train, weight_train = train_data
+	x_test, y_test, weight_test = test_data
+	
 	if scoring[1] == 'weighted':
 		weight_metric_train, weight_metric_test = weight_train.copy(), weight_test.copy()
 	
@@ -99,9 +114,8 @@ def compute_sample_weights(x_train, y_train, weight_train, x_test, y_test, weigh
 	return x_train, y_train, weight_train, weight_metric_train, x_test, y_test, weight_test, weight_metric_test
 
 
-def missing_values_removal(x_data, y_data, weight_data, train_index, test_index):
-	x_train, y_train, weight_train = pd.DataFrame(x_data.values[train_index]), y_data[train_index], weight_data[train_index]
-	x_test, y_test, weight_test = pd.DataFrame(x_data.values[test_index]), y_data[test_index], weight_data[test_index]
+def missing_values_removal(data, index):
+	x_train, y_train, weight_train, x_test, y_test, weight_test = create_train_test_sets(data, index)
 	
 	# Handle missing values by filling with mean
 	fillna_df = x_train.mean()
