@@ -15,3 +15,5 @@ TASKS = {
 		'classification_binary'    : ['average_precision', 'neg_log_loss', 'neg_brier_score', 'roc_auc'],
 		'classification_multiclass': ['average_precision', 'neg_log_loss', 'roc_auc_ova', 'roc_auc_ovr']
 		}
+
+MODELS = {}

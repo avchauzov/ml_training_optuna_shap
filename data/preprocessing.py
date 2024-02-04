@@ -84,7 +84,7 @@ def preprocess_data_lightgbm(data, index):
 	return x_train, y_train, weight_train, x_test, y_test, weight_test
 
 
-def compute_sample_weights(train_data, test_data, weighing, scoring):
+def compute_sample_weights(data_train, data_test, weighing, scoring):
 	"""
 	Compute sample weights for training and test data based on specified conditions.
 
@@ -99,8 +99,8 @@ def compute_sample_weights(train_data, test_data, weighing, scoring):
 	Returns:
 	- Training and test data along with computed sample weights
 	"""
-	x_train, y_train, weight_train = train_data
-	x_test, y_test, weight_test = test_data
+	x_train, y_train, weight_train = data_train
+	x_test, y_test, weight_test = data_test
 	
 	if scoring[1] == 'weighted':
 		weight_metric_train, weight_metric_test = weight_train.copy(), weight_test.copy()
