@@ -1,13 +1,4 @@
 def get_metric_dictionary(task_name):
-	"""
-	Get a dictionary of scoring methods and their optimization directions based on the machine learning task.
-
-	Parameters:
-	- task_name: Machine learning task (e.g., 'regression', 'classification_binary', 'classification_multiclass')
-
-	Returns:
-	- Dictionary of scoring methods and their optimization directions
-	"""
 	if task_name == 'regression':
 		return {
 				'neg_mean_absolute_error': 'minimize',
@@ -140,22 +131,6 @@ def multinomialnb_parameters(trial):
 
 
 def generate_hyperparameter_space(task_name, model_name, _type, trial, scoring, num_class, n_jobs, test):
-	"""
-	Generates a hyperparameter search space based on the task, model, and other parameters.
-
-	Args:
-	    task_name (str): The machine learning task type (e.g., 'classification_binary', 'regression').
-	    model_name (str): The model type (e.g., 'lightgbm', 'sgdlinear').
-	    _type (str): The type of search space ('long' or 'short').
-	    n_jobs (int): Number of CPU cores to use for training (e.g., 4).
-	    trial (object): An instance of an optimization trial.
-	    scoring (str): The scoring metric used for optimization (e.g., 'roc_auc_ovr', 'l2').
-	    num_class (int): Number of classes (for multi-class tasks).
-
-	Returns:
-	    dict: A dictionary representing the hyperparameter search space.
-	"""
-	
 	'''
 	FIX
 	structure
