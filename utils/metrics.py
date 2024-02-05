@@ -1,4 +1,4 @@
-from settings.settings import METRICS, TASKS
+from automl.settings import METRICS, TASKS
 
 
 def get_metric_dictionary_from_settings(task_name):

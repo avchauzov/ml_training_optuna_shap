@@ -1,12 +1,10 @@
 import numpy as np
 import pandas as pd
 import shap
-from tasks.classification_binary import calculate_prediction_error as classification_binary_calculate_prediction_error
-from tasks.classification_multiclass import calculate_prediction_error as classification_multiclass_calculate_prediction_error
-from tasks.regression import calculate_prediction_error as regression_calculate_prediction_error
 
-from models._lightgbm import split_and_weight_data as lightgbm_split_and_weight_data, train_model as lightgbm_train_model
-from models._sgdlinear import split_and_weight_data as sgdmodel_split_and_weight_data, train_model as sgdmodel_train_model
+from data.data_weights import split_and_weight_data
+from tasks.functions import calculate_test_error
+from train.train_models import train_lightgbm_model, train_sgdlinear_model
 
 
 def select_important_features(x_data, train_error, test_error, to_use, metrics, scoring):
@@ -53,27 +51,27 @@ def select_important_features(x_data, train_error, test_error, to_use, metrics, 
 
 def process_data(task_name, model_name, x_data, y_data, weight_data, train_index, test_index, weight_adjustment, scoring, hyperparameters, train_error, test_error, index_column, x_values, shap_values):
 	if model_name == 'sgdlinear':
-		x_train, y_train, weight_train_list, metric_weight_train_list, x_test, y_test, weight_test_list, metric_weight_test_list = sgdmodel_split_and_weight_data(x_data, y_data, weight_data, train_index, test_index, weight_adjustment, scoring, task_name)
-		model = sgdmodel_train_model(x_train, y_train, weight_train_list, hyperparameters, task_name)
+		x_train, y_train, weight_train_list, metric_weight_train_list, x_test, y_test, weight_test_list, metric_weight_test_list = split_and_weight_data(x_data, y_data, train_index, weight_data)
+		model = train_sgdlinear_model(x_train, y_train, weight_train_list, hyperparameters, task_name)
 	
 	elif model_name == 'lightgbm':
-		x_train, y_train, weight_train_list, metric_weight_train_list, x_test, y_test, weight_test_list, metric_weight_test_list = lightgbm_split_and_weight_data(x_data, y_data, weight_data, train_index, test_index, weight_adjustment, scoring)
-		model = lightgbm_train_model(x_train, y_train, weight_train_list, x_test, y_test, weight_test_list, hyperparameters, task_name)
+		x_train, y_train, weight_train_list, metric_weight_train_list, x_test, y_test, weight_test_list, metric_weight_test_list = split_and_weight_data(x_data, y_data, train_index, weight_data)
+		model = train_lightgbm_model(x_train, y_train, weight_train_list, x_test, y_test, weight_test_list, hyperparameters, task_name)
 	
 	else:
 		raise ValueError(f'Unknown model name: {model_name}')
 	
 	if task_name == 'regression':
-		train_error.append(regression_calculate_prediction_error(x_train, y_train, model, metric_weight_train_list, scoring))
-		test_error.append(regression_calculate_prediction_error(x_test, y_test, model, metric_weight_test_list, scoring))
+		train_error.append(calculate_test_error(x_train, y_train, model, metric_weight_train_list, scoring))
+		test_error.append(calculate_test_error(x_test, y_test, model, metric_weight_test_list, scoring))
 	
 	elif task_name == 'classification_binary':
-		train_error.append(classification_binary_calculate_prediction_error(x_train, y_train, model, metric_weight_train_list, scoring))
-		test_error.append(classification_binary_calculate_prediction_error(x_test, y_test, model, metric_weight_test_list, scoring))
+		train_error.append(calculate_test_error(x_train, y_train, model, metric_weight_train_list, scoring))
+		test_error.append(calculate_test_error(x_test, y_test, model, metric_weight_test_list, scoring))
 	
 	elif task_name == 'classification_multiclass':
-		train_error.append(classification_multiclass_calculate_prediction_error(x_train, y_train, model, metric_weight_train_list, scoring))
-		test_error.append(classification_multiclass_calculate_prediction_error(x_test, y_test, model, metric_weight_test_list, scoring))
+		train_error.append(calculate_test_error(x_train, y_train, model, metric_weight_train_list, scoring))
+		test_error.append(calculate_test_error(x_test, y_test, model, metric_weight_test_list, scoring))
 	
 	
 	else:
