@@ -1,3 +1,7 @@
+"""
+This script defines various evaluation metrics and associated functions for optimization tasks. It also provides a dictionary `METRIC_FUNCTIONS` that maps metric names to optimization directions and corresponding metric functions.
+"""
+
 from sklearn.metrics import (
 	average_precision_score,
 	brier_score_loss,
@@ -7,21 +11,14 @@ from sklearn.metrics import (
 	roc_auc_score,
 	)
 
-from utils.custom_metrics import symmetrical_mape
+from src.utils.custom_metrics import calculate_symmetrical_mape
 
 
-TASKS = {
-		'regression'               : ['neg_mean_absolute_error', 'neg_mean_squared_error', 'sMAPE'],
-		'classification_binary'    : ['average_precision', 'neg_log_loss', 'neg_brier_score', 'roc_auc'],
-		'classification_multiclass': ['average_precision', 'neg_log_loss', 'roc_auc_ova', 'roc_auc_ovr']
-		}
-
-MODELS = {'lightgbm', 'multinomialnb', 'sgdlinear'}
-
-METRICS = {
+# Dictionary mapping metric names to optimization directions and corresponding metric functions
+METRIC_FUNCTIONS = {
 		'neg_mean_absolute_error': ['minimize', mean_absolute_error],
 		'neg_mean_squared_error' : ['minimize', mean_squared_error],
-		'sMAPE'                  : ['minimize', symmetrical_mape],
+		'sMAPE'                  : ['minimize', calculate_symmetrical_mape],
 		'neg_log_loss'           : ['minimize', log_loss],
 		'average_precision'      : ['maximize', lambda y_true, y_pred, sample_weight: average_precision_score(y_true=y_true, y_score=y_pred, sample_weight=sample_weight)],
 		'roc_auc'                : ['maximize', lambda y_true, y_pred, sample_weight: roc_auc_score(y_true=y_true, y_score=y_pred, sample_weight=sample_weight)],

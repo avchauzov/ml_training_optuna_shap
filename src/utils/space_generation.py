@@ -1,11 +1,40 @@
-def implement_lightgbm_production_mode(parameters, trial):
+"""
+This module contains functions for generating hyperparameters for different tasks, models, and optimization types.
+"""
+
+
+# Function to set LightGBM production mode parameters based on trial suggestions
+def set_lightgbm_production_mode_parameters(parameters, trial):
+	"""
+	Set LightGBM production mode parameters based on trial suggestions.
+
+	Args:
+		parameters (dict): Dictionary of hyperparameters.
+		trial: Trial object for optimization.
+
+	Returns:
+		dict: Updated dictionary of hyperparameters.
+	"""
 	parameters['device'] = trial.suggest_categorical('device', ['gpu'])
 	parameters['gpu_use_dp'] = trial.suggest_categorical('gpu_use_dp', [False])
-	
 	return parameters
 
 
+# Function to generate LightGBM parameters for the 'long' configuration
 def lightgbm_long_parameters(trial, objective, metric, num_class, n_jobs):
+	"""
+	Generate LightGBM parameters for the 'long' configuration based on trial suggestions.
+
+	Args:
+		trial: Trial object for optimization.
+		objective (list): List of objective functions.
+		metric (list): List of evaluation metrics.
+		num_class (int): Number of classes for multiclass tasks.
+		n_jobs (int): Number of parallel jobs.
+
+	Returns:
+		dict: Dictionary of LightGBM hyperparameters.
+	"""
 	parameters = {
 			'num_leaves'       : trial.suggest_int('num_leaves', 2, 1024),
 			'max_depth'        : trial.suggest_int('max_depth', 2, 16),
@@ -15,7 +44,6 @@ def lightgbm_long_parameters(trial, objective, metric, num_class, n_jobs):
 			'max_cat_threshold': trial.suggest_int('max_cat_threshold', 2, 128),
 			'subsample_freq'   : trial.suggest_int('subsample_freq', 0, 1024),
 			'n_estimators'     : trial.suggest_int('n_estimators', 128, 128),
-			
 			'extra_trees'      : trial.suggest_categorical('extra_trees', [True, False]),
 			'boosting_type'    : trial.suggest_categorical('boosting_type', ['gbdt', 'dart', 'rf']),
 			'objective'        : trial.suggest_categorical('objective', objective),
@@ -23,7 +51,6 @@ def lightgbm_long_parameters(trial, objective, metric, num_class, n_jobs):
 			'learning_rate'    : trial.suggest_categorical('learning_rate', [0.1]),
 			'n_jobs'           : trial.suggest_categorical('n_jobs', [n_jobs]),
 			'verbosity'        : trial.suggest_categorical('verbosity', [-1]),
-			
 			'reg_alpha'        : trial.suggest_float('reg_alpha', 1e-6, 128.0, log=True),
 			'reg_lambda'       : trial.suggest_float('reg_lambda', 1e-6, 128.0, log=True),
 			'min_split_gain'   : trial.suggest_float('min_split_gain', 1e-6, 128.0, log=True),
@@ -39,27 +66,50 @@ def lightgbm_long_parameters(trial, objective, metric, num_class, n_jobs):
 	return parameters
 
 
+# Function to generate LightGBM parameters for the 'short' configuration
 def lightgbm_short_parameters(trial):
+	"""
+	Generate LightGBM parameters for the 'short' configuration based on trial suggestions.
+
+	Args:
+		trial: Trial object for optimization.
+
+	Returns:
+		dict: Dictionary of LightGBM hyperparameters.
+	"""
 	return {
 			'n_estimators' : trial.suggest_int('n_estimators', 64, 1024, step=1),
 			'learning_rate': trial.suggest_float('learning_rate', 0.001, 1.0, step=0.001),
 			}
 
 
-def sgdlinear_long_parameters(trial, loss, penalty, n_jobs, _type):
+# Function to generate SGDLinear parameters for the 'long' configuration
+def sgdlinear_long_parameters(trial, loss, penalty, n_jobs, task_name):
+	"""
+	Generate SGDLinear parameters for the 'long' configuration based on trial suggestions.
+
+	Args:
+		trial: Trial object for optimization.
+		loss (list): List of loss functions.
+		penalty (list): List of penalty terms.
+		n_jobs (int): Number of parallel jobs.
+		task_name (str): Task name.
+
+	Returns:
+		dict: Dictionary of SGDLinear hyperparameters.
+	"""
 	parameters = {
 			'loss'          : trial.suggest_categorical('loss', loss),
 			'penalty'       : trial.suggest_categorical('penalty', penalty),
 			'fit_intercept' : trial.suggest_categorical('fit_intercept', [True, False]),
 			'early_stopping': trial.suggest_categorical('early_stopping', [False]),
 			'verbose'       : trial.suggest_categorical('verbose', [0]),
-			
 			'alpha'         : trial.suggest_float('alpha', 1e-6, 128.0, log=True),
 			'l1_ratio'      : trial.suggest_float('l1_ratio', 0.0, 1.0, step=0.01),
 			'epsilon'       : trial.suggest_float('epsilon', 1e-6, 128.0, log=True),
 			}
 	
-	if _type.startswith('classification'):
+	if task_name.startswith('classification'):
 		parameters.update(
 				{
 						'n_jobs'      : trial.suggest_categorical('n_jobs', [n_jobs]),
@@ -70,13 +120,24 @@ def sgdlinear_long_parameters(trial, loss, penalty, n_jobs, _type):
 	return parameters
 
 
-def sgdlinear_short_parameters(trial, _type):
+# Function to generate SGDLinear parameters for the 'short' configuration
+def sgdlinear_short_parameters(trial, task_name):
+	"""
+	Generate SGDLinear parameters for the 'short' configuration based on trial suggestions.
+
+	Args:
+		trial: Trial object for optimization.
+		task_name (str): Task name.
+
+	Returns:
+		dict: Dictionary of SGDLinear hyperparameters.
+	"""
 	parameters = {
 			'max_iter'      : trial.suggest_int('max_iter', 512, 2048, step=1),
 			'early_stopping': trial.suggest_categorical('early_stopping', [False]),
 			}
 	
-	if _type not in ['classification_multiclass']:
+	if task_name not in ['classification_multiclass']:
 		parameters.update(
 				{
 						'n_iter_no_change'   : trial.suggest_int('n_iter_no_change', 2, 16, step=1),
@@ -87,74 +148,19 @@ def sgdlinear_short_parameters(trial, _type):
 	return parameters
 
 
+# Function to generate parameters for MultinomialNB
 def multinomialnb_parameters(trial):
+	"""
+	Generate parameters for MultinomialNB based on trial suggestions.
+
+	Args:
+		trial: Trial object for optimization.
+
+	Returns:
+		dict: Dictionary of MultinomialNB hyperparameters.
+	"""
 	return {
 			'force_alpha': trial.suggest_categorical('force_alpha', [True, False]),
 			'fit_prior'  : trial.suggest_categorical('fit_prior', [True, False]),
 			'alpha'      : trial.suggest_float('alpha', 1e-6, 128.0, step=0.1),
 			}
-
-
-def generate_hyperparameter_space(task_name, model_name, metric_name, trial, optimization_type, num_class, n_jobs, test_mode):
-	"""
-	FIX
-	structure
-	trial warnings
-	"""
-	
-	parameters = {}
-	if (task_name, model_name, optimization_type) == ('classification_binary', 'lightgbm', 'long'):
-		objective = ['binary']
-		metric = ['auc', 'average_precision', 'binary_logloss']
-		parameters = lightgbm_long_parameters(trial, objective, metric, 1, n_jobs)
-	
-	elif (task_name, model_name, optimization_type) == ('classification_binary', 'lightgbm', 'short'):
-		parameters = lightgbm_short_parameters(trial)
-	
-	elif (task_name, model_name, optimization_type) == ('classification_multiclass', 'lightgbm', 'long'):
-		objective = ['multiclass'] if metric_name in ['roc_auc_ovr', 'roc_auc_ova'] else ['multiclass', 'multiclassova']
-		metric = ['auc_mu', 'multi_logloss', 'multi_error']
-		parameters = lightgbm_long_parameters(trial, objective, metric, num_class, n_jobs)
-	
-	elif (task_name, model_name, optimization_type) == ('classification_multiclass', 'lightgbm', 'short'):
-		parameters = lightgbm_short_parameters(trial)
-	
-	elif (task_name, model_name, optimization_type) == ('regression', 'lightgbm', 'long'):
-		objective = ['regression', 'regression_l1', 'huber', 'fair', 'quantile', 'mape']
-		metric = ['l1', 'l2', 'rmse', 'quantile', 'mape', 'huber', 'fair', 'poisson', 'tweedie']
-		parameters = lightgbm_long_parameters(trial, objective, metric, 1, n_jobs)
-	
-	elif (task_name, model_name, optimization_type) == ('regression', 'lightgbm', 'short'):
-		parameters = lightgbm_short_parameters(trial)
-	
-	elif (task_name, model_name, optimization_type) == ('classification_binary', 'sgdlinear', 'long'):
-		loss = ['log_loss', 'modified_huber']
-		penalty = ['l2', 'l1', 'elasticnet']
-		parameters = sgdlinear_long_parameters(trial, loss, penalty, n_jobs, optimization_type)
-	
-	elif (task_name, model_name, optimization_type) == ('classification_binary', 'sgdlinear', 'short'):
-		parameters = sgdlinear_short_parameters(trial, optimization_type)
-	
-	elif (task_name, model_name, optimization_type) == ('classification_multiclass', 'sgdlinear', 'long'):
-		loss = ['modified_huber']
-		penalty = ['l2', 'l1', 'elasticnet']
-		parameters = sgdlinear_long_parameters(trial, loss, penalty, n_jobs, optimization_type)
-	
-	elif (task_name, model_name, optimization_type) == ('classification_multiclass', 'sgdlinear', 'short'):
-		parameters = sgdlinear_short_parameters(trial, optimization_type)
-	
-	elif (task_name, model_name, optimization_type) == ('regression', 'sgdlinear', 'long'):
-		loss = ['squared_error', 'huber', 'epsilon_insensitive', 'squared_epsilon_insensitive']
-		penalty = ['l2', 'l1', 'elasticnet']
-		parameters = sgdlinear_long_parameters(trial, loss, penalty, n_jobs, optimization_type)
-	
-	elif (task_name, model_name, optimization_type) == ('regression', 'sgdlinear', 'short'):
-		parameters = sgdlinear_short_parameters(trial, optimization_type)
-	
-	elif (task_name, model_name, optimization_type) == ('classification_multiclass', 'multinomialnb', 'long'):
-		parameters = multinomialnb_parameters(trial)
-	
-	if not test_mode and model_name == 'lightgbm' and optimization_type == 'long':
-		parameters = implement_lightgbm_production_mode(parameters, trial)
-	
-	return parameters
