@@ -53,7 +53,7 @@ def report_generation(error, selected, metric_name):
 	report_df['Number of Columns'] = [len(value) for value in selected]
 	
 	direction = True if METRIC_FUNCTIONS[metric_name][0] in ['minimize'] else False
-	report_df = report_df.sort_values(['Test Error', 'Number of Columns'], ascending=[direction, True])
+	report_df = report_df.sort_values(['Test Error', 'Number of Columns', 'Train Error'], ascending=[direction, True, direction])
 	
 	columns_to_select_list = sorted(report_df.index)
 	table = report_df.to_string(index=False, header=True, justify='center')
@@ -64,7 +64,7 @@ def report_generation(error, selected, metric_name):
 	
 	print(formatted_table)
 	
-	return columns_to_select_list
+	return selected[report_df.index[0]]
 
 
 def shap_values_calculation(task_name, model_name, metric_name, data, index, error, hyperparameters, x_values, shap_values):
@@ -145,7 +145,7 @@ def feature_selection(data, cv, hyperparameters, drop_rate, min_columns_to_keep,
 	train_error_cv, test_error_cv = [], []
 	selected, to_drop = list(x_data), []
 	
-	with tqdm(total=len(selected), position=0, dynamic_ncols=True) as pbar:
+	with tqdm(total=len(selected) - min_columns_to_keep, position=0, dynamic_ncols=True) as pbar:
 		while len(selected) >= min_columns_to_keep:
 			train_error, test_error = [], []
 			_index, x_values, shap_values = [], [], []
@@ -183,14 +183,8 @@ def feature_selection(data, cv, hyperparameters, drop_rate, min_columns_to_keep,
 					)
 			drop_count = int(np.ceil(shap_values_df.shape[0] * drop_rate))
 			
-			if shap_values_df.shape[0] - drop_count < min_columns_to_keep:
-				if drop_count == 0:
-					drop_count = 1
-				else:
-					drop_count = shap_values_df.shape[0] - min_columns_to_keep
-			
-			important = sorted(shap_values_df.index.values[: drop_count])
-			not_important = sorted(shap_values_df.index.values[drop_count:])
+			important = sorted(shap_values_df.index.values[: -drop_count])
+			not_important = sorted(shap_values_df.index.values[-drop_count:])
 			
 			selected_cv.append(important)
 			to_drop_cv.append(not_important)

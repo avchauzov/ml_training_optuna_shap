@@ -2,6 +2,7 @@
 This script provides functions for automating the machine learning model selection, hyperparameter optimization, and feature selection process using Optuna.
 """
 import time
+import warnings
 
 import numpy as np
 import optuna
@@ -13,7 +14,9 @@ from src.scripts.feature_selection import feature_selection
 from src.utils.tasks import TASKS
 
 
+warnings.filterwarnings('always')
 optuna.logging.set_verbosity(optuna.logging.CRITICAL)
+
 
 
 def validate_task_model_metric(task_name, model_name, metric_name):
@@ -39,7 +42,7 @@ def validate_task_model_metric(task_name, model_name, metric_name):
 		raise ValueError(f'Error: Unknown metric name: {metric_name}')
 
 
-def find_best_model(task_name, model_name, metric_name, x_data, y_data, weight_data, cv, n_trials_long, n_trials_short, patience, n_jobs, drop_rate=0.50, min_columns_to_keep=8, test_mode=False):
+def find_best_model(task_name, model_name, metric_name, x_data, y_data, weight_data, cv, n_trials_long, n_trials_short, patience, n_jobs, drop_rate=0.5, min_columns_to_keep=8, test_mode=False):
 	"""
 	Automates the process of model selection, hyperparameter optimization, and feature selection.
 
@@ -70,11 +73,17 @@ def find_best_model(task_name, model_name, metric_name, x_data, y_data, weight_d
 	elif not isinstance(weight_data, np.ndarray):
 		weight_data = np.array(weight_data)
 	
+	warnings_list = []
+	
 	# Step 1: Hyperparameters General Optimization
 	print('Step 1: Hyperparameters General Optimization')
 	time.sleep(1)
 	
-	best_hyperparameters = optimize_hyperparameters([x_data, y_data, weight_data], {}, cv, n_trials_long, patience, 'long', n_jobs, task_name, model_name, metric_name, test_mode)
+	with warnings.catch_warnings(record=True) as _warnings:
+		best_hyperparameters = optimize_hyperparameters([x_data, y_data, weight_data], {}, cv, n_trials_long, patience, 'long', n_jobs, task_name, model_name, metric_name, test_mode)
+		warnings_list.extend([(str(warning.category), str(warning.message)) for warning in _warnings])
+	
+	print(list(set(warnings_list)))
 	
 	if (task_name, model_name) == ('classification_multiclass', 'multinomialnb'):
 		return best_hyperparameters, list(x_data)
@@ -86,7 +95,11 @@ def find_best_model(task_name, model_name, metric_name, x_data, y_data, weight_d
 	print('Step 2: Feature Selection')
 	time.sleep(1)
 	
-	important_features_list = feature_selection([x_data, y_data, weight_data], cv, best_hyperparameters, drop_rate, min_columns_to_keep, task_name, model_name, metric_name)
+	with warnings.catch_warnings(record=True) as _warnings:
+		important_features_list = feature_selection([x_data, y_data, weight_data], cv, best_hyperparameters, drop_rate, min_columns_to_keep, task_name, model_name, metric_name)
+		warnings_list.extend([(str(warning.category), str(warning.message)) for warning in _warnings])
+	
+	print(list(set(warnings_list)))
 	
 	time.sleep(1)
 	print('\n')
@@ -94,7 +107,12 @@ def find_best_model(task_name, model_name, metric_name, x_data, y_data, weight_d
 	# Step 3: Learning Rate and n_estimators Optimization
 	print('Step 3: Learning Rate and n_estimators Optimization')
 	time.sleep(1)
-	best_hyperparameters = optimize_hyperparameters([x_data[important_features_list], y_data, weight_data], best_hyperparameters, cv, n_trials_short, patience, 'short', n_jobs, task_name, model_name, metric_name, test_mode)
+	
+	with warnings.catch_warnings(record=True) as _warnings:
+		best_hyperparameters = optimize_hyperparameters([x_data[important_features_list], y_data, weight_data], best_hyperparameters, cv, n_trials_short, patience, 'short', n_jobs, task_name, model_name, metric_name, test_mode)
+		warnings_list.extend([(str(warning.category), str(warning.message)) for warning in _warnings])
+	
+	print(list(set(warnings_list)))
 	
 	time.sleep(1)
 	print('\n')
