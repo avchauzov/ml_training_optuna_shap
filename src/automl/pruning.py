@@ -26,6 +26,8 @@ def apply_pruning(data, cv, space, best_score_history, patience, task_name, mode
 	Returns:
 		tuple: Mean and standard deviation of test errors from cross-validation.
 	"""
+	# https://github.com/optuna/optuna/issues/2021
+	
 	x_data, y_data, weight_data = data
 	
 	try:
