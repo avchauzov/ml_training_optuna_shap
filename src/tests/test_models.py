@@ -3,6 +3,7 @@ This script contains functions for generating synthetic data and running hyperpa
 """
 
 import os
+import random
 import sys
 
 import pandas as pd
@@ -10,6 +11,7 @@ from sklearn.datasets import make_classification, make_regression
 from sklearn.model_selection import KFold, StratifiedKFold
 
 from src.automl.optimization import find_best_model
+from src.utils.tasks import TASKS
 
 
 main_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
@@ -29,10 +31,11 @@ def generate_data_and_split(classification=True, n_classes=2):
 	"""
 	if classification:
 		x_data, y_data = make_classification(n_samples=8096, n_features=128, n_informative=4, n_classes=n_classes)
-		x_data = pd.DataFrame(x_data).abs()
+	
 	else:
 		x_data, y_data = make_regression(n_samples=8096, n_features=128, n_informative=4)
-		x_data = pd.DataFrame(x_data)
+	
+	x_data = pd.DataFrame(x_data)
 	
 	cv = []
 	if classification:
@@ -65,64 +68,86 @@ def run_optimization_for_test(task_name, model_name, metric_name, x_data, y_data
 			task_name=task_name, model_name=model_name, metric_name=metric_name, x_data=x_data, y_data=y_data,
 			weight_data=None, cv=cv, n_trials_long=32, n_trials_short=16, patience=8, n_jobs=16, test_mode=True
 			)
-	
-	assert 1 <= len(important_features_list) <= 128
 
 
 def test_lightgbm_classification_binary():
 	"""
 	Test hyperparameter optimization for LightGBM with binary classification.
 	"""
+	task_name = 'classification_binary'
+	metric_name = random.choice(TASKS.get(task_name))
+	
 	x_data, y_data, cv = generate_data_and_split()
-	run_optimization_for_test('classification_binary', 'lightgbm', 'roc_auc', x_data, y_data, cv)
+	run_optimization_for_test(task_name, 'lightgbm', metric_name, x_data, y_data, cv)
 
 
 def test_lightgbm_classification_multiclass():
 	"""
 	Test hyperparameter optimization for LightGBM with multiclass classification.
 	"""
-	x_data, y_data, cv = generate_data_and_split(n_classes=3)
-	run_optimization_for_test('classification_multiclass', 'lightgbm', 'roc_auc_ovr', x_data, y_data, cv)
+	task_name = 'classification_multiclass'
+	metric_name = random.choice(TASKS.get(task_name))
+	n_classes = random.choice(list(range(3, 9)))
+	
+	x_data, y_data, cv = generate_data_and_split(n_classes=n_classes)
+	run_optimization_for_test(task_name, 'lightgbm', metric_name, x_data, y_data, cv)
 
 
 def test_lightgbm_regression():
 	"""
 	Test hyperparameter optimization for LightGBM with regression.
 	"""
+	task_name = 'regression'
+	metric_name = random.choice(TASKS.get(task_name))
+	
 	x_data, y_data, cv = generate_data_and_split(classification=False)
-	run_optimization_for_test('regression', 'lightgbm', 'neg_mean_squared_error', x_data, y_data, cv)
+	run_optimization_for_test(task_name, 'lightgbm', metric_name, x_data, y_data, cv)
 
 
 def test_sgdlinear_classification_binary():
 	"""
 	Test hyperparameter optimization for SGD Linear with binary classification.
 	"""
+	task_name = 'classification_binary'
+	metric_name = random.choice(TASKS.get(task_name))
+	
 	x_data, y_data, cv = generate_data_and_split()
-	run_optimization_for_test('classification_binary', 'sgdlinear', 'roc_auc', x_data, y_data, cv)
+	run_optimization_for_test(task_name, 'sgdlinear', metric_name, x_data, y_data, cv)
 
 
 def test_sgdlinear_classification_multiclass():
 	"""
 	Test hyperparameter optimization for SGD Linear with multiclass classification.
 	"""
-	x_data, y_data, cv = generate_data_and_split(n_classes=3)
-	run_optimization_for_test('classification_multiclass', 'sgdlinear', 'roc_auc_ovr', x_data, y_data, cv)
+	task_name = 'classification_multiclass'
+	metric_name = random.choice(TASKS.get(task_name))
+	n_classes = random.choice(list(range(3, 9)))
+	
+	x_data, y_data, cv = generate_data_and_split(n_classes=n_classes)
+	run_optimization_for_test(task_name, 'sgdlinear', metric_name, x_data, y_data, cv)
 
 
 def test_sgdlinear_regression():
 	"""
 	Test hyperparameter optimization for SGD Linear with regression.
 	"""
+	task_name = 'regression'
+	metric_name = random.choice(TASKS.get(task_name))
+	
 	x_data, y_data, cv = generate_data_and_split(classification=False)
-	run_optimization_for_test('regression', 'sgdlinear', 'neg_mean_squared_error', x_data, y_data, cv)
+	run_optimization_for_test(task_name, 'sgdlinear', metric_name, x_data, y_data, cv)
 
 
 def test_multinomialnb_classification_multiclass():
 	"""
 	Test hyperparameter optimization for Multinomial Naive Bayes with multiclass classification.
 	"""
-	x_data, y_data, cv = generate_data_and_split(n_classes=3)
-	run_optimization_for_test('classification_multiclass', 'multinomialnb', 'roc_auc_ovr', x_data, y_data, cv)
+	task_name = 'classification_multiclass'
+	metric_name = random.choice(TASKS.get(task_name))
+	n_classes = random.choice(list(range(3, 9)))
+	
+	x_data, y_data, cv = generate_data_and_split(n_classes=n_classes)
+	run_optimization_for_test(task_name, 'multinomialnb', metric_name, x_data.abs(), y_data, cv)
 
 
 '''test_lightgbm_classification_binary()

@@ -18,7 +18,7 @@ TASKS = {
 		'classification_multiclass': [
 				'average_precision',
 				'neg_log_loss',
-				'roc_auc_ova',
+				'roc_auc_ovo',
 				'roc_auc_ovr'
 				]
 		}

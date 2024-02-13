@@ -22,7 +22,7 @@ METRIC_FUNCTIONS = {
 		'neg_log_loss'           : ['minimize', log_loss],
 		'average_precision'      : ['maximize', lambda y_true, y_pred, sample_weight: average_precision_score(y_true=y_true, y_score=y_pred, sample_weight=sample_weight)],
 		'roc_auc'                : ['maximize', lambda y_true, y_pred, sample_weight: roc_auc_score(y_true=y_true, y_score=y_pred, sample_weight=sample_weight)],
-		'neg_brier_score'        : ['minimize', lambda y_true, y_pred, sample_weight: brier_score_loss(y_true=y_true, y_pred=y_pred, sample_weight=sample_weight)],
-		'roc_auc_ova'            : ['maximize', lambda y_true, y_pred, sample_weight: roc_auc_score(y_true=y_true, y_score=y_pred, sample_weight=sample_weight, multi_class='ova')],
+		'neg_brier_score'        : ['minimize', lambda y_true, y_pred, sample_weight: brier_score_loss(y_true=y_true, y_prob=y_pred, sample_weight=sample_weight)],
+		'roc_auc_ovo'            : ['maximize', lambda y_true, y_pred, sample_weight: roc_auc_score(y_true=y_true, y_score=y_pred, sample_weight=sample_weight, multi_class='ovo')],
 		'roc_auc_ovr'            : ['maximize', lambda y_true, y_pred, sample_weight: roc_auc_score(y_true=y_true, y_score=y_pred, sample_weight=sample_weight, multi_class='ovr')]
 		}

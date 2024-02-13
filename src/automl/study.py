@@ -6,7 +6,7 @@ import numpy as np
 import optuna
 import tqdm
 
-from src.automl.metrics import METRIC_FUNCTIONS
+from src.automl.metric_functions import METRIC_FUNCTIONS
 from src.automl.pruning import apply_pruning
 from src.utils.functions import update_dict_with_new_keys
 from src.utils.parameter_generation import generate_hyperparameters
@@ -87,7 +87,7 @@ def optimize_with_study(metric_name, n_trials, hyperparameters, objective_functi
 			
 			try:
 				best_value = trial.study.best_value
-				pbar.set_postfix({'Best Score': best_value})  # Update the best score in tqdm output
+				pbar.set_postfix({metric_name: best_value})  # Update the best score in tqdm output
 			
 			except ValueError:
 				pass

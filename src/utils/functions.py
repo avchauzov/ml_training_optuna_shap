@@ -2,10 +2,7 @@
 This module contains functions for calculating test errors and metrics, as well as updating dictionaries.
 """
 
-import numpy as np
-from sklearn.preprocessing import OneHotEncoder
-
-from src.automl.metrics import METRIC_FUNCTIONS
+from src.automl.metric_functions import METRIC_FUNCTIONS
 
 
 def calculate_test_error(data, model, metric_name, task_name):
@@ -46,8 +43,8 @@ def calculate_error(data, task_name, metric_name):
 	"""
 	y_true, y_pred, sample_weight = data
 	
-	if task_name not in ['regression'] and y_true.ndim == 1:
-		y_true = OneHotEncoder(sparse_output=False).fit_transform(np.array(y_true).reshape(-1, 1))
+	if task_name in ['classification_binary']:
+		y_pred = y_pred[:, 1]
 	
 	# Calculate metric using calculate_metric function
 	return calculate_metric([y_true, y_pred, sample_weight], metric_name)

@@ -2,7 +2,7 @@
 This module contains a function to retrieve a dictionary of metrics and their properties for a given task.
 """
 
-from src.automl.metrics import METRIC_FUNCTIONS
+from src.automl.metric_functions import METRIC_FUNCTIONS
 from src.utils.tasks import TASKS
 
 

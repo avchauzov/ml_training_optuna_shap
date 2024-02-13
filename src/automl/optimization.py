@@ -7,7 +7,7 @@ import warnings
 import numpy as np
 import optuna
 
-from src.automl.metrics import METRIC_FUNCTIONS
+from src.automl.metric_functions import METRIC_FUNCTIONS
 from src.automl.study import optuna_hyperparameter_optimization
 from src.models.models import MODELS
 from src.scripts.feature_selection import feature_selection
@@ -16,7 +16,6 @@ from src.utils.tasks import TASKS
 
 warnings.filterwarnings('always')
 optuna.logging.set_verbosity(optuna.logging.CRITICAL)
-
 
 
 def validate_task_model_metric(task_name, model_name, metric_name):
@@ -42,7 +41,7 @@ def validate_task_model_metric(task_name, model_name, metric_name):
 		raise ValueError(f'Error: Unknown metric name: {metric_name}')
 
 
-def find_best_model(task_name, model_name, metric_name, x_data, y_data, weight_data, cv, n_trials_long, n_trials_short, patience, n_jobs, drop_rate=0.5, min_columns_to_keep=8, test_mode=False):
+def find_best_model(task_name, model_name, metric_name, x_data, y_data, weight_data, cv, n_trials_long, n_trials_short, patience=0.1, n_jobs=-1, drop_rate=0.5, min_columns_to_keep=8, test_mode=False):
 	"""
 	Automates the process of model selection, hyperparameter optimization, and feature selection.
 
@@ -144,7 +143,7 @@ def optimize_hyperparameters(data, hyperparameters, cv, trials, patience, trial_
 		Exception: If no valid hyperparameters are found during optimization.
 
 	"""
-	best_hyperparameters = optuna_hyperparameter_optimization(data, cv, hyperparameters, trials, patience, trial_type, n_jobs, task_name, model_name, metric_name, test_mode)
+	best_hyperparameters = optuna_hyperparameter_optimization(data, cv, hyperparameters, trials, int(np.ceil(patience * trials)), trial_type, n_jobs, task_name, model_name, metric_name, test_mode)
 	
 	if not best_hyperparameters:
 		raise Exception('Hyperparameter optimization did not find any valid hyperparameters. Please check your input data, hyperparameter search space, or "n_trials" value.')
