@@ -2,6 +2,7 @@
 This script contains functions for generating synthetic data and running hyperparameter optimization tests.
 """
 
+import logging
 import os
 import random
 import sys
@@ -16,6 +17,8 @@ from src.utils.tasks import TASKS
 
 main_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 sys.path.insert(0, main_folder)
+
+logging.basicConfig(level=logging.INFO)
 
 
 def generate_data_and_split(classification=True, n_classes=2):
@@ -64,6 +67,8 @@ def run_optimization_for_test(task_name, model_name, metric_name, x_data, y_data
 	Returns:
 		None
 	"""
+	logging.info(f'Test: task_name={task_name}, model_name={model_name}, metric_name={metric_name}')
+	
 	best_hyperparameters_dictionary, important_features_list = find_best_model(
 			task_name=task_name, model_name=model_name, metric_name=metric_name, x_data=x_data, y_data=y_data,
 			weight_data=None, cv=cv, n_trials_long=32, n_trials_short=16, patience=8, n_jobs=16, test_mode=True
