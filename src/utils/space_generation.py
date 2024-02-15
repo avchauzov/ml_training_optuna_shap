@@ -36,26 +36,7 @@ def lightgbm_long_parameters(trial, objective, metric, num_class, n_jobs):
 	Returns:
 		dict: Dictionary of LightGBM hyperparameters.
 	"""
-	'''with open('data/lightgbm.json', 'r') as file:
-		optuna_parameters = json.load(file)
 	
-	optuna_parameters = optuna_parameters.get('long', {})
-	
-	parameters = {}
-	for key, value in optuna_parameters.items():
-	
-		if value[0] in ['int']:
-			column_name, min_value, max_value, step = value
-			parameters[key] = trial.suggest_int(column_name, min_value, max_value, step)
-		
-		elif value[0] in ['categorical']:
-			column_name, values = value
-			values = [True if value == 'True']
-			parameters[key] = trial.suggest_categorical(column_name, values)
-		
-		elif value[0] in ['float']:
-			column_name, min_value, max_value, step_log = value
-			parameters[key] = trial.suggest_float(column_name, values)'''
 	
 	parameters = {
 			'num_leaves'       : trial.suggest_int('num_leaves', 2, 1024),
