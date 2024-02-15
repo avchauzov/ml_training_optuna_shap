@@ -50,7 +50,7 @@ def lightgbm_long_parameters(trial, objective, metric, num_class, n_jobs):
 		
 		elif value[0] in ['categorical']:
 			column_name, values = value
-			
+			values = [True if value == 'True']
 			parameters[key] = trial.suggest_categorical(column_name, values)
 		
 		elif value[0] in ['float']:

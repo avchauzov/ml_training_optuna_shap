@@ -36,7 +36,7 @@ def generate_hyperparameters(task_name, model_name, metric_name, trial, optimiza
 	
 	elif task_name == 'classification_multiclass' and model_name == 'lightgbm':
 		if optimization_type == 'long':
-			objective = ['multiclass'] if metric_name in ['roc_auc_ovr'] else ['multiclassova'] if metric_name in ['roc_auc_ovo'] else ['multiclass', 'multiclassova']
+			objective = ['multiclass'] if metric_name in ['roc_auc_ovo', 'roc_auc_ovr'] else ['multiclass', 'multiclassova']
 			metric = ['auc_mu', 'multi_logloss', 'multi_error']
 			parameters = lightgbm_long_parameters(trial, objective, metric, num_class, n_jobs)
 		elif optimization_type == 'short':
