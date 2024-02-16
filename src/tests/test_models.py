@@ -67,9 +67,6 @@ def run_optimization_for_test(task_name, model_name, metric_name, x_data, y_data
 	Returns:
 		None
 	"""
-	# logging.info(f'Test: task_name={task_name}, model_name={model_name}, metric_name={metric_name}')
-	print(f'Test: task_name={task_name}, model_name={model_name}, metric_name={metric_name}')
-	
 	best_hyperparameters_dictionary, important_features_list = find_best_model(
 			task_name=task_name, model_name=model_name, metric_name=metric_name, x_data=x_data, y_data=y_data,
 			weight_data=None, cv=cv, n_trials_long=32, n_trials_short=16, patience=8, n_jobs=16, test_mode=True
@@ -156,10 +153,10 @@ def test_multinomialnb_classification_multiclass():
 	run_optimization_for_test(task_name, 'multinomialnb', metric_name, x_data.abs(), y_data, cv)
 
 
-# test_lightgbm_classification_binary()
+'''test_lightgbm_classification_binary()
 test_lightgbm_classification_multiclass()
-'''test_lightgbm_regression()
-test_sgdlinear_classification_binary()'''
+test_lightgbm_regression()
+test_sgdlinear_classification_binary()
 test_sgdlinear_classification_multiclass()
-'''test_sgdlinear_regression()
+test_sgdlinear_regression()
 test_multinomialnb_classification_multiclass()'''

@@ -74,8 +74,12 @@ def find_best_model(task_name, model_name, metric_name, x_data, y_data, weight_d
 	
 	warnings_list = []
 	
-	# Step 1: Hyperparameters General Optimization
-	print('Step 1: Hyperparameters General Optimization')
+	print('Starting optimization with the following parameters:')
+	print(f'task_name="{task_name}", model_name="{model_name}", metric_name="{metric_name}", n_trials_long={n_trials_long}, n_trials_short={n_trials_short}, patience={patience}, n_jobs={n_jobs}, drop_rate={drop_rate}, min_columns_to_keep={min_columns_to_keep}')
+	print()
+	
+	# Step 1: Hyperparameters Optimization
+	print('Step 1: Hyperparameters Optimization')
 	time.sleep(1)
 	
 	with warnings.catch_warnings(record=True) as _warnings:
@@ -103,8 +107,8 @@ def find_best_model(task_name, model_name, metric_name, x_data, y_data, weight_d
 	time.sleep(1)
 	print('\n')
 	
-	# Step 3: Learning Rate and n_estimators Optimization
-	print('Step 3: Learning Rate and n_estimators Optimization')
+	# Step 3: Hyperparameters Fine-Tuning
+	print('Step 3: Hyperparameters Fine-Tuning')
 	time.sleep(1)
 	
 	with warnings.catch_warnings(record=True) as _warnings:

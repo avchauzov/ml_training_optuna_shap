@@ -1,0 +1,32 @@
+{
+    "long": {
+	"fit_intercept": [
+	    "categorical", [true, false]
+	],
+	"early_stopping": [
+	    "categorical", [false]
+	],
+	"verbose": [
+	    "categorical", [0]
+	],
+	"alpha": [
+	    "float", 1e-6, 128.0, true
+	],
+	"l1_ratio": [
+	    "float", 0.0, 1.0, 0.01
+	],
+	"epsilon": [
+	    "float", 1e-6, 128.0, true
+	]
+    },
+    "short": {
+	"max_iter": [
+	    "int", 512, 2048, 1
+	]
+    },
+    "classification": {
+	"class_weight": [
+	    "categorical", [null, "balanced"]
+	]
+    }
+}

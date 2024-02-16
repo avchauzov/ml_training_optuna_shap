@@ -34,8 +34,10 @@ def cross_validate(data, cv, hyperparameters, task_name, model_name, metric_name
 		# Train the model based on the model name
 		if model_name == 'lightgbm':
 			model = train_lightgbm_model([x_train, y_train, weight_train], [x_test, y_test, weight_test], hyperparameters, task_name)
+		
 		elif model_name == 'multinomialnb':
 			model = train_multinomialnb_model([x_train, y_train, weight_train], hyperparameters)
+		
 		else:
 			model = train_sgdlinear_model([x_train, y_train, weight_train], hyperparameters, task_name)
 		

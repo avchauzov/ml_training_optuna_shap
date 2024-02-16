@@ -1,0 +1,13 @@
+{
+    "long": {
+	"force_alpha": [
+	    "categorical", [true, false]
+	],
+	"fit_prior": [
+	    "categorical", [true, false]
+	],
+	"alpha": [
+	    "float", 1e-6, 128.0, 0.01
+	]
+    }
+}
