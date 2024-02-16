@@ -85,6 +85,9 @@ def lightgbm_long_parameters(trial, objective, metric, num_class, n_jobs):
 	Returns:
 		dict: Dictionary of LightGBM hyperparameters.
 	"""
+	import os
+	print(os.getcwd())
+	
 	parameters = load_optuna_parameters('../utils/data/lightgbm.json', 'long', trial)
 	
 	parameters.update(
