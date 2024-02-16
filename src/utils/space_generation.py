@@ -66,7 +66,7 @@ def set_lightgbm_production_mode_parameters(parameters, trial):
 	Returns:
 		dict: Updated dictionary of hyperparameters.
 	"""
-	parameters.update(load_optuna_parameters('../utils/data/lightgbm.json', 'gpu', trial))
+	parameters.update(load_optuna_parameters('src/utils/data/lightgbm.json', 'gpu', trial))
 	return parameters
 
 
@@ -85,10 +85,7 @@ def lightgbm_long_parameters(trial, objective, metric, num_class, n_jobs):
 	Returns:
 		dict: Dictionary of LightGBM hyperparameters.
 	"""
-	import os
-	print(os.getcwd())
-	
-	parameters = load_optuna_parameters('../utils/data/lightgbm.json', 'long', trial)
+	parameters = load_optuna_parameters('src/utils/data/lightgbm.json', 'long', trial)
 	
 	parameters.update(
 			{
@@ -115,7 +112,7 @@ def lightgbm_short_parameters(trial):
 	Returns:
 		dict: Dictionary of LightGBM hyperparameters.
 	"""
-	return load_optuna_parameters('../utils/data/lightgbm.json', 'short', trial)
+	return load_optuna_parameters('src/utils/data/lightgbm.json', 'short', trial)
 
 
 # Function to generate SGDLinear parameters for the 'long' configuration
@@ -133,7 +130,7 @@ def sgdlinear_long_parameters(trial, loss, penalty, n_jobs, task_name):
 	Returns:
 		dict: Dictionary of SGDLinear hyperparameters.
 	"""
-	parameters = load_optuna_parameters('../utils/data/sgdlinear.json', 'long', trial)
+	parameters = load_optuna_parameters('src/utils/data/sgdlinear.json', 'long', trial)
 	
 	parameters.update(
 			{
@@ -143,7 +140,7 @@ def sgdlinear_long_parameters(trial, loss, penalty, n_jobs, task_name):
 			)
 	
 	if task_name.startswith('classification'):
-		parameters.update(load_optuna_parameters('../utils/data/sgdlinear.json', 'classification', trial))
+		parameters.update(load_optuna_parameters('src/utils/data/sgdlinear.json', 'classification', trial))
 		parameters.update(
 				{
 						'n_jobs': trial.suggest_categorical('n_jobs', [n_jobs])
@@ -165,7 +162,7 @@ def sgdlinear_short_parameters(trial, task_name):
 	Returns:
 		dict: Dictionary of SGDLinear hyperparameters.
 	"""
-	return load_optuna_parameters('../utils/data/sgdlinear.json', 'short', trial)
+	return load_optuna_parameters('src/utils/data/sgdlinear.json', 'short', trial)
 
 
 # Function to generate parameters for MultinomialNB
@@ -179,4 +176,4 @@ def multinomialnb_parameters(trial):
 	Returns:
 		dict: Dictionary of MultinomialNB hyperparameters.
 	"""
-	return load_optuna_parameters('../utils/data/multinomialnb.json', 'long', trial)
+	return load_optuna_parameters('src/utils/data/multinomialnb.json', 'long', trial)
