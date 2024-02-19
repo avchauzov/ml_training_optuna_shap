@@ -33,10 +33,10 @@ def generate_data_and_split(classification=True, n_classes=2):
 		tuple: Tuple containing x_data, y_data, and cross-validation fold indices (cv).
 	"""
 	if classification:
-		x_data, y_data = make_classification(n_samples=8096, n_features=128, n_informative=8, n_classes=n_classes)
+		x_data, y_data = make_classification(n_samples=8096, n_features=32, n_informative=8, n_classes=n_classes)
 	
 	else:
-		x_data, y_data = make_regression(n_samples=8096, n_features=128, n_informative=8)
+		x_data, y_data = make_regression(n_samples=8096, n_features=32, n_informative=8)
 	
 	x_data = pd.DataFrame(x_data)
 	
@@ -160,3 +160,36 @@ test_sgdlinear_classification_binary()
 test_sgdlinear_classification_multiclass()
 test_sgdlinear_regression()
 test_multinomialnb_classification_multiclass()'''
+
+'''
+import optuna
+
+storage_url = "sqlite:///example_study.db"  # Path to the SQLite database file.
+study_name = "example_study"  # Unique identifier of the study.
+study = optuna.create_study(study_name=study_name, storage=storage_url, load_if_exists=True)
+
+#
+
+from multiprocessing import Process
+import optuna
+
+def optimize():
+    storage_url = "sqlite:///example_study.db"
+    study_name = "example_study"
+    study = optuna.create_study(direction="minimize", study_name=study_name, storage=storage_url, load_if_exists=True)
+    study.optimize(objective, n_trials=100)
+
+if __name__ == "__main__":
+    workers = 4  # Adjust based on your machine's CPU cores.
+    processes = [Process(target=optimize) for _ in range(workers)]
+
+    for process in processes:
+        process.start()
+
+    for process in processes:
+        process.join()
+        
+#
+
+profiling
+'''

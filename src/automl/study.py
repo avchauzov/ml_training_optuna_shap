@@ -5,6 +5,7 @@ This script contains functions for hyperparameter optimization using Optuna.
 import numpy as np
 import optuna
 import tqdm
+from optuna.importance import get_param_importances
 from optuna.trial import TrialState
 
 from src._settings.metrics import METRIC_FUNCTIONS
@@ -104,6 +105,11 @@ def optimize_with_study(metric_name, n_trials, hyperparameters, objective_functi
 			return objective_function(trial)
 		
 		study.optimize(objective_function_with_progress_bar, n_trials=n_trials)
+	
+	parameter_importance = get_param_importances(study)
+	parameter_importance = dict(sorted(parameter_importance.items(), key=lambda parameter: (-parameter[1], parameter[0])))
+	
+	print(f'Parameter importance: {parameter_importance}')
 	
 	study_results = [(trial.values[0], trial.user_attrs.get('std_score'), trial.duration, trial.params) for trial in study.trials if trial.state == optuna.trial.TrialState.COMPLETE]
 	if not study_results:
