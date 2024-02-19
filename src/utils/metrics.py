@@ -2,8 +2,8 @@
 This module contains a function to retrieve a dictionary of metrics and their properties for a given task.
 """
 
-from src.automl.metric_functions import METRIC_FUNCTIONS
-from src.utils.tasks import TASKS
+from src._settings.metrics import METRIC_FUNCTIONS
+from src._settings.tasks import TASKS
 
 
 def get_metric_dictionary_from_settings(task_name):

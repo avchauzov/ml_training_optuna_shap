@@ -11,8 +11,8 @@ import pandas as pd
 from sklearn.datasets import make_classification, make_regression
 from sklearn.model_selection import KFold, StratifiedKFold
 
+from src._settings.tasks import TASKS
 from src.automl.optimization import find_best_model
-from src.utils.tasks import TASKS
 
 
 main_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
@@ -33,10 +33,10 @@ def generate_data_and_split(classification=True, n_classes=2):
 		tuple: Tuple containing x_data, y_data, and cross-validation fold indices (cv).
 	"""
 	if classification:
-		x_data, y_data = make_classification(n_samples=8096, n_features=128, n_informative=4, n_classes=n_classes)
+		x_data, y_data = make_classification(n_samples=8096, n_features=128, n_informative=8, n_classes=n_classes)
 	
 	else:
-		x_data, y_data = make_regression(n_samples=8096, n_features=128, n_informative=4)
+		x_data, y_data = make_regression(n_samples=8096, n_features=128, n_informative=8)
 	
 	x_data = pd.DataFrame(x_data)
 	
@@ -153,10 +153,10 @@ def test_multinomialnb_classification_multiclass():
 	run_optimization_for_test(task_name, 'multinomialnb', metric_name, x_data.abs(), y_data, cv)
 
 
-'''test_lightgbm_classification_binary()
+test_lightgbm_classification_binary()
 test_lightgbm_classification_multiclass()
 test_lightgbm_regression()
 test_sgdlinear_classification_binary()
 test_sgdlinear_classification_multiclass()
 test_sgdlinear_regression()
-test_multinomialnb_classification_multiclass()'''
+test_multinomialnb_classification_multiclass()

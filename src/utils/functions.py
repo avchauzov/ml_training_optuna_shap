@@ -2,7 +2,7 @@
 This module contains functions for calculating test errors and metrics, as well as updating dictionaries.
 """
 
-from src.automl.metric_functions import METRIC_FUNCTIONS
+from src._settings.metrics import METRIC_FUNCTIONS
 
 
 def calculate_test_error(data, model, metric_name, task_name):
@@ -25,29 +25,14 @@ def calculate_test_error(data, model, metric_name, task_name):
 	else:
 		predictions = model.predict_proba(x_test)
 	
-	# Calculate error using calculate_error function
-	return calculate_error([y_test, predictions, sample_weight_test], task_name, metric_name)
-
-
-def calculate_error(data, task_name, metric_name):
-	"""
-	Calculate the error using true and predicted values, considering the task type.
-
-	Args:
-		data (list): List containing y_true, y_pred, and sample_weight.
-		task_name (str): Task name.
-		metric_name (str): Metric name.
-
-	Returns:
-		float: Calculated error based on the specified metric and task.
-	"""
-	y_true, y_pred, sample_weight = data
-	
 	if task_name in ['classification_binary']:
-		y_pred = y_pred[:, 1]
+		predictions = predictions[:, 1]
 	
-	# Calculate metric using calculate_metric function
-	return calculate_metric([y_true, y_pred, sample_weight], metric_name)
+	# Calculate error using calculate_error function
+	return calculate_metric([y_test, predictions, sample_weight_test], metric_name)
+
+
+
 
 
 def calculate_metric(data, metric_name):

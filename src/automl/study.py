@@ -5,8 +5,9 @@ This script contains functions for hyperparameter optimization using Optuna.
 import numpy as np
 import optuna
 import tqdm
+from optuna.trial import TrialState
 
-from src.automl.metric_functions import METRIC_FUNCTIONS
+from src._settings.metrics import METRIC_FUNCTIONS
 from src.automl.pruning import apply_pruning
 from src.utils.functions import update_dict_with_new_keys
 from src.utils.parameter_generation import generate_hyperparameters
@@ -45,6 +46,14 @@ def optuna_hyperparameter_optimization(data, cv, hyperparameters, n_trials, pati
 		Returns:
 			float: Mean score obtained during cross-validation.
 		"""
+		states_to_consider = (TrialState.COMPLETE, TrialState.FAIL, TrialState.PRUNED)
+		trials_to_consider = trial.study.get_trials(deepcopy=False, states=states_to_consider)
+		
+		for _trial in reversed(trials_to_consider):
+			
+			if trial.params == _trial.params:
+				return _trial.value
+		
 		space = generate_hyperparameters(task_name, model_name, metric_name, trial, optimization_type, len(np.unique(y_data)), n_jobs, test_mode)
 		space = update_dict_with_new_keys(space, hyperparameters)
 		

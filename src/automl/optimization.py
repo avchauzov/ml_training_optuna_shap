@@ -7,11 +7,11 @@ import warnings
 import numpy as np
 import optuna
 
-from src.automl.metric_functions import METRIC_FUNCTIONS
+from src._settings.metrics import METRIC_FUNCTIONS
+from src._settings.models import MODELS
+from src._settings.tasks import TASKS
 from src.automl.study import optuna_hyperparameter_optimization
-from src.models.models import MODELS
 from src.scripts.feature_selection import feature_selection
-from src.utils.tasks import TASKS
 
 
 warnings.filterwarnings('always')

@@ -4,7 +4,7 @@ This script provides a function for performing cross-validation on machine learn
 
 import numpy as np
 
-from src.data.loading import split_data
+from src.data.preprocessing import preprocess_data
 from src.models.training import train_lightgbm_model, train_multinomialnb_model, train_sgdlinear_model
 from src.utils.functions import calculate_test_error
 
@@ -29,7 +29,7 @@ def cross_validate(data, cv, hyperparameters, task_name, model_name, metric_name
 	
 	for train_index, test_index in cv:
 		# Split data into training and test sets
-		x_train, y_train, weight_train, x_test, y_test, weight_test = split_data([x_data, y_data, weight_data], [train_index, test_index])
+		x_train, y_train, weight_train, x_test, y_test, weight_test = preprocess_data([x_data, y_data, weight_data], [train_index, test_index], model_name)
 		
 		# Train the model based on the model name
 		if model_name == 'lightgbm':

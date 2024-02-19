@@ -8,7 +8,7 @@ import pandas as pd
 import shap
 from tqdm import tqdm
 
-from src.automl.metric_functions import METRIC_FUNCTIONS
+from src._settings.metrics import METRIC_FUNCTIONS
 from src.data.loading import split_data
 from src.models.training import train_lightgbm_model, train_sgdlinear_model
 from src.utils.functions import calculate_test_error

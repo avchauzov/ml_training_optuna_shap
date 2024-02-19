@@ -123,12 +123,9 @@ def preprocess_data(data, index, model_name):
 			'sgdlinear'    : preprocess_data_sgdlinear
 			}
 	
-	if model_name in preprocess_functions:
-		preprocess_func = preprocess_functions[model_name]
-		x_train, y_train, weight_train, x_test, y_test, weight_test = preprocess_func(
+	preprocess_function = preprocess_functions[model_name]
+	x_train, y_train, weight_train, x_test, y_test, weight_test = preprocess_function(
 				[x_data, y_data, weight_data], [train_index, test_index]
 				)
-	else:
-		raise ValueError(f'Unknown model name: {model_name}')
 	
 	return x_train, y_train, weight_train, x_test, y_test, weight_test

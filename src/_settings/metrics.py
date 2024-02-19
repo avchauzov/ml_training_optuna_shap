@@ -11,7 +11,7 @@ from sklearn.metrics import (
 	roc_auc_score,
 	)
 
-from src.utils.custom_metrics import calculate_symmetrical_mape
+from src._settings.custom_metrics import calculate_symmetrical_mape
 
 
 # Dictionary mapping metric names to optimization directions and corresponding metric functions
