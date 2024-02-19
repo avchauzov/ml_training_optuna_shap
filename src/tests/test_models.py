@@ -153,10 +153,10 @@ def test_multinomialnb_classification_multiclass():
 	run_optimization_for_test(task_name, 'multinomialnb', metric_name, x_data.abs(), y_data, cv)
 
 
-test_lightgbm_classification_binary()
+'''test_lightgbm_classification_binary()
 test_lightgbm_classification_multiclass()
 test_lightgbm_regression()
 test_sgdlinear_classification_binary()
 test_sgdlinear_classification_multiclass()
 test_sgdlinear_regression()
-test_multinomialnb_classification_multiclass()
+test_multinomialnb_classification_multiclass()'''
