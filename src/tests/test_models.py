@@ -162,34 +162,9 @@ test_sgdlinear_regression()
 test_multinomialnb_classification_multiclass()'''
 
 '''
-import optuna
-
-storage_url = "sqlite:///example_study.db"  # Path to the SQLite database file.
-study_name = "example_study"  # Unique identifier of the study.
-study = optuna.create_study(study_name=study_name, storage=storage_url, load_if_exists=True)
-
-#
-
-from multiprocessing import Process
-import optuna
-
-def optimize():
-    storage_url = "sqlite:///example_study.db"
-    study_name = "example_study"
-    study = optuna.create_study(direction="minimize", study_name=study_name, storage=storage_url, load_if_exists=True)
-    study.optimize(objective, n_trials=100)
-
-if __name__ == "__main__":
-    workers = 4  # Adjust based on your machine's CPU cores.
-    processes = [Process(target=optimize) for _ in range(workers)]
-
-    for process in processes:
-        process.start()
-
-    for process in processes:
-        process.join()
-        
-#
-
 profiling
+scaling - parameters
+preprocessing - out
+replace SGD
+parameters
 '''

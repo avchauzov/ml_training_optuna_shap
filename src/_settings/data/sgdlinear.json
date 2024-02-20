@@ -9,6 +9,9 @@
 	"verbose": [
 	    "categorical", [0]
 	],
+	"scaler": [
+	    "categorical", ["MaxAbsScaler", "MinMaxScaler", "RobustScaler", "StandardScaler"]
+	],
 	"alpha": [
 	    "float", 1e-6, 128.0, true
 	],

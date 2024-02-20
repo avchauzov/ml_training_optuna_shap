@@ -8,7 +8,7 @@ import optuna
 from src.models.cross_validation import cross_validate
 
 
-def apply_pruning(data, cv, space, best_score_history, patience, task_name, model_name, metric_name, trial):
+def perform_trial(data, cv, space, best_score_history, patience, task_name, model_name, metric_name, trial):
 	"""
 	Apply pruning to the optimization trial based on best score history.
 

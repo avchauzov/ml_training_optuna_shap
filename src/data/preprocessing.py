@@ -2,7 +2,7 @@
 This module contains functions for data preprocessing.
 """
 
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler, RobustScaler, StandardScaler
 
 from src.data.loading import split_data
 
@@ -37,7 +37,7 @@ def preprocess_data_multinomialnb(data, index, fillna=True):
 	return filling_and_scaling_data(data, index, fillna=fillna)
 
 
-def preprocess_data_sgdlinear(data, index, fillna=True, scale=True):
+def preprocess_data_sgdlinear(data, index, scaler_name, fillna=True):
 	"""
 	Preprocess data for SGDLinear model.
 
@@ -50,10 +50,10 @@ def preprocess_data_sgdlinear(data, index, fillna=True, scale=True):
 	Returns:
 		tuple: A tuple containing x_train, y_train, weight_train, x_test, y_test, and weight_test.
 	"""
-	return filling_and_scaling_data(data, index, fillna=fillna, scale=scale)
+	return filling_and_scaling_data(data, index, scaler_name, fillna=fillna)
 
 
-def filling_and_scaling_data(data, index, fillna=True, scale=False):
+def filling_and_scaling_data(data, index, scaler_name=None, fillna=True):
 	"""
 	Fill NaN values and scale data.
 
@@ -77,8 +77,15 @@ def filling_and_scaling_data(data, index, fillna=True, scale=False):
 		x_train = x_train.dropna(how='all', axis=1)
 		x_test = x_test.dropna(how='all', axis=1)
 	
-	if scale:
-		scaler = MinMaxScaler((0.1, 0.9))
+	if scaler_name:
+		scaler_functions = {
+				'MaxAbsScaler'  : MaxAbsScaler(),
+				'MinMaxScaler'  : MinMaxScaler(),
+				'RobustScaler'  : RobustScaler(),
+				'StandardScaler': StandardScaler()
+				}
+		
+		scaler = scaler_functions.get(scaler_name)
 		x_train = scaler.fit_transform(x_train)
 		x_test = scaler.transform(x_test)
 	
@@ -102,7 +109,7 @@ def common_columns_selection(x_train, x_test):
 	return x_train, x_test
 
 
-def preprocess_data(data, index, model_name):
+def preprocess_data(data, index, scaler_name, model_name):
 	"""
 	Preprocess data based on the specified model.
 
@@ -125,7 +132,7 @@ def preprocess_data(data, index, model_name):
 	
 	preprocess_function = preprocess_functions[model_name]
 	x_train, y_train, weight_train, x_test, y_test, weight_test = preprocess_function(
-				[x_data, y_data, weight_data], [train_index, test_index]
+			[x_data, y_data, weight_data], [train_index, test_index], scaler_name
 				)
 	
 	return x_train, y_train, weight_train, x_test, y_test, weight_test
