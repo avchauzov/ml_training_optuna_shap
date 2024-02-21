@@ -130,7 +130,7 @@ def test_sgdlinear_classification_multiclass():
 	run_optimization_for_test(task_name, 'sgdlinear', metric_name, x_data, y_data, cv)
 
 
-def test_sgdlinear_regression():
+def test_elasticnet_regression():
 	"""
 	Test hyperparameter optimization for SGD Linear with regression.
 	"""
@@ -138,7 +138,7 @@ def test_sgdlinear_regression():
 	metric_name = random.choice(TASKS.get(task_name))
 	
 	x_data, y_data, cv = generate_data_and_split(classification=False)
-	run_optimization_for_test(task_name, 'sgdlinear', metric_name, x_data, y_data, cv)
+	run_optimization_for_test(task_name, 'elasticnet', metric_name, x_data, y_data, cv)
 
 
 def test_multinomialnb_classification_multiclass():
@@ -158,7 +158,7 @@ test_lightgbm_classification_multiclass()
 test_lightgbm_regression()
 test_sgdlinear_classification_binary()
 test_sgdlinear_classification_multiclass()
-test_sgdlinear_regression()
+test_elasticnet_regression()
 test_multinomialnb_classification_multiclass()'''
 
 '''
@@ -167,4 +167,7 @@ scaling - parameters
 preprocessing - out
 replace SGD
 parameters
+full settings check
+ConvergenceWarning
+parameters as an input
 '''

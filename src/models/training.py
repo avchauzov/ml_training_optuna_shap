@@ -4,7 +4,7 @@ and Stochastic Gradient Descent (SGD) Linear models.
 """
 
 import lightgbm
-from sklearn.linear_model import SGDClassifier, SGDRegressor
+from sklearn.linear_model import ElasticNet, SGDClassifier, SGDRegressor
 from sklearn.naive_bayes import MultinomialNB
 
 
@@ -24,12 +24,12 @@ def train_lightgbm_model(data_train, data_test, hyperparameters, task_name):
 	x_train, y_train, sample_weight_train = data_train
 	x_test, y_test, sample_weight_test = data_test
 	
-	if task_name == 'regression':
+	if task_name in ['regression']:
 		model = lightgbm.LGBMRegressor(**hyperparameters)
 	else:
 		model = lightgbm.LGBMClassifier(**hyperparameters)
 	
-	if hyperparameters['boosting_type'] == 'dart':
+	if hyperparameters['boosting_type'] in ['dart']:
 		model.fit(
 				x_train, y_train,
 				sample_weight=sample_weight_train,
@@ -86,10 +86,19 @@ def train_sgdlinear_model(data, hyperparameters, task_name):
 	"""
 	x_train, y_train, sample_weight_train = data
 	
-	if task_name == 'regression':
+	if task_name in ['regression']:
 		model = SGDRegressor(**hyperparameters)
 	else:
 		model = SGDClassifier(**hyperparameters)
+	
+	model.fit(x_train, y_train, sample_weight=sample_weight_train)
+	return model
+
+
+def train_elasticnet_model(data, hyperparameters, task_name):
+	x_train, y_train, sample_weight_train = data
+	
+	model = ElasticNet(**hyperparameters)
 	
 	model.fit(x_train, y_train, sample_weight=sample_weight_train)
 	return model

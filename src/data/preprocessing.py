@@ -37,7 +37,7 @@ def preprocess_data_multinomialnb(data, index, fillna=True):
 	return filling_and_scaling_data(data, index, fillna=fillna)
 
 
-def preprocess_data_sgdlinear(data, index, scaler_name, fillna=True):
+def preprocess_data_linear(data, index, scaler_name, fillna=True):
 	"""
 	Preprocess data for SGDLinear model.
 
@@ -127,7 +127,8 @@ def preprocess_data(data, index, scaler_name, model_name):
 	preprocess_functions = {
 			'lightgbm'     : preprocess_data_lightgbm,
 			'multinomialnb': preprocess_data_multinomialnb,
-			'sgdlinear'    : preprocess_data_sgdlinear
+			'sgdlinear' : preprocess_data_linear,
+			'elasticnet': preprocess_data_linear
 			}
 	
 	preprocess_function = preprocess_functions[model_name]

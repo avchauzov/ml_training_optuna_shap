@@ -10,7 +10,7 @@ from tqdm import tqdm
 
 from src._settings.metrics import METRIC_FUNCTIONS
 from src.data.preprocessing import preprocess_data
-from src.models.training import train_lightgbm_model, train_sgdlinear_model
+from src.models.training import train_elasticnet_model, train_lightgbm_model, train_sgdlinear_model
 from src.utils.functions import calculate_test_error
 
 
@@ -98,11 +98,13 @@ def shap_values_calculation(task_name, model_name, metric_name, data, index, err
 	x_train, y_train, weight_train, x_test, y_test, weight_test = preprocess_data([x_data, y_data, weight_data], [train_index, test_index], scaler_name, model_name)
 	
 	model = None
-	if model_name == 'sgdlinear':
-		
+	if model_name in ['sgdlinear']:
 		model = train_sgdlinear_model([x_train, y_train, weight_train], hyperparameters, task_name)
 	
-	elif model_name == 'lightgbm':
+	elif model_name in ['elasticnet']:
+		model = train_elasticnet_model([x_train, y_train, weight_train], hyperparameters, task_name)
+	
+	elif model_name in ['lightgbm']:
 		model = train_lightgbm_model(
 				[x_train, y_train, weight_train], [x_test, y_test, weight_test],
 				hyperparameters, task_name
@@ -111,7 +113,7 @@ def shap_values_calculation(task_name, model_name, metric_name, data, index, err
 	train_error.append(calculate_test_error([x_train, y_train, weight_train], model, metric_name, task_name))
 	test_error.append(calculate_test_error([x_test, y_test, weight_test], model, metric_name, task_name))
 	
-	if model_name == 'sgdlinear':
+	if model_name in ['sgdlinear', 'elasticnet']:
 		explainer = shap.LinearExplainer(model, x_train)
 	else:
 		explainer = shap.TreeExplainer(model)

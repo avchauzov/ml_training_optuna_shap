@@ -88,7 +88,7 @@ def find_best_model(task_name, model_name, metric_name, x_data, y_data, weight_d
 	
 	print(list(set(warnings_list)))
 	
-	if (task_name, model_name) == ('classification_multiclass', 'multinomialnb'):
+	if (task_name, model_name) in [('classification_multiclass', 'multinomialnb')]:
 		return best_hyperparameters, list(x_data)
 	
 	time.sleep(1)

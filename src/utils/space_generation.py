@@ -3,6 +3,8 @@ This module contains functions for generating hyperparameters for different task
 """
 import json
 
+import numpy as np
+
 
 def load_optuna_parameters(file_path, _type, trial):
 	"""
@@ -27,6 +29,7 @@ def load_optuna_parameters(file_path, _type, trial):
 			_, min_value, max_value, step_log = value
 			
 			if isinstance(step_log, int):
+				max_value = min_value + step_log ** np.floor((max_value - min_value) / step_log)
 				parameters[key] = trial.suggest_int(key, min_value, max_value, step=step_log)
 			
 			elif isinstance(step_log, bool):
@@ -43,6 +46,7 @@ def load_optuna_parameters(file_path, _type, trial):
 			_, min_value, max_value, step_log = value
 			
 			if isinstance(step_log, float):
+				max_value = min_value + step_log ** np.floor((max_value - min_value) / step_log)
 				parameters[key] = trial.suggest_float(key, min_value, max_value, step=step_log)
 			
 			elif isinstance(step_log, bool):
@@ -163,6 +167,14 @@ def sgdlinear_short_parameters(trial, task_name):
 		dict: Dictionary of SGDLinear hyperparameters.
 	"""
 	return load_optuna_parameters('src/_settings/data/sgdlinear.json', 'short', trial)
+
+
+def elasticnet_long_parameters(trial):
+	return load_optuna_parameters('src/_settings/data/elasticnet.json', 'long', trial)
+
+
+def elasticnet_short_parameters(trial):
+	return load_optuna_parameters('src/_settings/data/elasticnet.json', 'short', trial)
 
 
 # Function to generate parameters for MultinomialNB
