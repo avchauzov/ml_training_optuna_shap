@@ -107,7 +107,7 @@ def test_lightgbm_regression():
 	run_optimization_for_test(task_name, 'lightgbm', metric_name, x_data, y_data, cv)
 
 
-def test_sgdlinear_classification_binary():
+def test_logisticregression_classification_binary():
 	"""
 	Test hyperparameter optimization for SGD Linear with binary classification.
 	"""
@@ -115,10 +115,10 @@ def test_sgdlinear_classification_binary():
 	metric_name = random.choice(TASKS.get(task_name))
 	
 	x_data, y_data, cv = generate_data_and_split()
-	run_optimization_for_test(task_name, 'sgdlinear', metric_name, x_data, y_data, cv)
+	run_optimization_for_test(task_name, 'logisticregression', metric_name, x_data, y_data, cv)
 
 
-def test_sgdlinear_classification_multiclass():
+def test_logisticregression_classification_multiclass():
 	"""
 	Test hyperparameter optimization for SGD Linear with multiclass classification.
 	"""
@@ -127,7 +127,7 @@ def test_sgdlinear_classification_multiclass():
 	n_classes = random.choice(list(range(3, 9)))
 	
 	x_data, y_data, cv = generate_data_and_split(n_classes=n_classes)
-	run_optimization_for_test(task_name, 'sgdlinear', metric_name, x_data, y_data, cv)
+	run_optimization_for_test(task_name, 'logisticregression', metric_name, x_data, y_data, cv)
 
 
 def test_elasticnet_regression():
@@ -152,32 +152,6 @@ def test_multinomialnb_classification_multiclass():
 	x_data, y_data, cv = generate_data_and_split(n_classes=n_classes)
 	run_optimization_for_test(task_name, 'multinomialnb', metric_name, x_data.abs(), y_data, cv)
 
-
-def test_logisticregression_classification_binary():
-	"""
-	Test hyperparameter optimization for SGD Linear with binary classification.
-	"""
-	task_name = 'classification_binary'
-	metric_name = random.choice(TASKS.get(task_name))
-	
-	x_data, y_data, cv = generate_data_and_split()
-	run_optimization_for_test(task_name, 'logisticregression', metric_name, x_data, y_data, cv)
-
-
-def test_logisticregression_classification_multiclass():
-	"""
-	Test hyperparameter optimization for SGD Linear with multiclass classification.
-	"""
-	task_name = 'classification_multiclass'
-	metric_name = random.choice(TASKS.get(task_name))
-	n_classes = random.choice(list(range(3, 9)))
-	
-	x_data, y_data, cv = generate_data_and_split(n_classes=n_classes)
-	run_optimization_for_test(task_name, 'logisticregression', metric_name, x_data, y_data, cv)
-
-
-# test_logisticregression_classification_binary()
-# test_logisticregression_classification_multiclass()
 
 '''test_lightgbm_classification_binary()
 test_lightgbm_classification_multiclass()
