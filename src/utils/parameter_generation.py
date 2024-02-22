@@ -2,7 +2,10 @@
 This module contains a function for generating hyperparameters based on task, model, and optimization type.
 """
 
-from src.utils.space_generation import elasticnet_long_parameters, elasticnet_short_parameters, lightgbm_long_parameters, lightgbm_short_parameters, multinomialnb_parameters, set_lightgbm_production_mode_parameters, sgdlinear_long_parameters, sgdlinear_short_parameters
+from src.utils.space_generation import (
+	elasticnet_long_parameters, elasticnet_short_parameters, lightgbm_long_parameters, lightgbm_short_parameters, logisticregression_long_parameters, logisticregression_short_parameters, multinomialnb_parameters, set_lightgbm_production_mode_parameters, sgdlinear_long_parameters,
+	sgdlinear_short_parameters,
+	)
 
 
 def generate_hyperparameters(task_name, model_name, metric_name, trial, optimization_type, num_class, n_jobs, test_mode):
@@ -71,6 +74,12 @@ def generate_hyperparameters(task_name, model_name, metric_name, trial, optimiza
 			parameters = elasticnet_long_parameters(trial)
 		elif optimization_type in ['short']:
 			parameters = elasticnet_short_parameters(trial)
+	
+	elif model_name in ['logisticregression']:
+		if optimization_type in ['long']:
+			parameters = logisticregression_long_parameters(trial, n_jobs)
+		elif optimization_type in ['short']:
+			parameters = logisticregression_short_parameters(trial)
 	
 	elif task_name in ['classification_multiclass'] and model_name in ['multinomialnb']:
 		parameters = multinomialnb_parameters(trial)

@@ -4,7 +4,7 @@ and Stochastic Gradient Descent (SGD) Linear models.
 """
 
 import lightgbm
-from sklearn.linear_model import ElasticNet, SGDClassifier, SGDRegressor
+from sklearn.linear_model import ElasticNet, LogisticRegression, SGDClassifier, SGDRegressor
 from sklearn.naive_bayes import MultinomialNB
 
 
@@ -101,4 +101,18 @@ def train_elasticnet_model(data, hyperparameters, task_name):
 	model = ElasticNet(**hyperparameters)
 	
 	model.fit(x_train, y_train, sample_weight=sample_weight_train)
+	return model
+
+
+def train_logisticregression_model(data, hyperparameters, task_name):
+	x_train, y_train, sample_weight_train = data
+	
+	model = LogisticRegression(**hyperparameters)
+	
+	try:
+		model.fit(x_train, y_train, sample_weight=sample_weight_train)
+	
+	except Exception as error:
+		model = None
+	
 	return model

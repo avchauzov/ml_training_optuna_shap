@@ -1,0 +1,30 @@
+{
+    "long": {
+	"penalty": [
+	    "categorical", ["l1", "l2", "elasticnet", null]
+	],
+	"fit_intercept": [
+	    "categorical", [true, false]
+	],
+	"class_weight": [
+	    "categorical", [null, "balanced"]
+	],
+	"solver": [
+	    "categorical", ["lbfgs", "liblinear", "newton-cg", "newton-cholesky", "sag", "saga"]
+	],
+	"scaler": [
+	    "categorical", ["MaxAbsScaler", "MinMaxScaler", "RobustScaler", "StandardScaler"]
+	],
+	"C": [
+	    "float", 1e-3, 128.0, true
+	],
+	"l1_ratio": [
+	    "float", 0.0, 1.0, 1e-2
+	]
+    },
+    "short": {
+	"max_iter": [
+	    "int", 64, 128, 1
+	]
+    }
+}

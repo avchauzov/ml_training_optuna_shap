@@ -153,21 +153,49 @@ def test_multinomialnb_classification_multiclass():
 	run_optimization_for_test(task_name, 'multinomialnb', metric_name, x_data.abs(), y_data, cv)
 
 
+def test_logisticregression_classification_binary():
+	"""
+	Test hyperparameter optimization for SGD Linear with binary classification.
+	"""
+	task_name = 'classification_binary'
+	metric_name = random.choice(TASKS.get(task_name))
+	
+	x_data, y_data, cv = generate_data_and_split()
+	run_optimization_for_test(task_name, 'logisticregression', metric_name, x_data, y_data, cv)
+
+
+def test_logisticregression_classification_multiclass():
+	"""
+	Test hyperparameter optimization for SGD Linear with multiclass classification.
+	"""
+	task_name = 'classification_multiclass'
+	metric_name = random.choice(TASKS.get(task_name))
+	n_classes = random.choice(list(range(3, 9)))
+	
+	x_data, y_data, cv = generate_data_and_split(n_classes=n_classes)
+	run_optimization_for_test(task_name, 'logisticregression', metric_name, x_data, y_data, cv)
+
+
+# test_logisticregression_classification_binary()
+# test_logisticregression_classification_multiclass()
+
 '''test_lightgbm_classification_binary()
 test_lightgbm_classification_multiclass()
 test_lightgbm_regression()
 test_sgdlinear_classification_binary()
 test_sgdlinear_classification_multiclass()
 test_elasticnet_regression()
-test_multinomialnb_classification_multiclass()'''
+test_multinomialnb_classification_multiclass()
+test_logisticregression_classification_binary()
+test_logisticregression_classification_multiclass()'''
 
 '''
 profiling
 scaling - parameters
 preprocessing - out
-replace SGD
 parameters
 full settings check
 ConvergenceWarning
 parameters as an input
+dynamic space
 '''

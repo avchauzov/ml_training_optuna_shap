@@ -128,7 +128,8 @@ def preprocess_data(data, index, scaler_name, model_name):
 			'lightgbm'     : preprocess_data_lightgbm,
 			'multinomialnb': preprocess_data_multinomialnb,
 			'sgdlinear' : preprocess_data_linear,
-			'elasticnet': preprocess_data_linear
+			'elasticnet'        : preprocess_data_linear,
+			'logisticregression': preprocess_data_linear
 			}
 	
 	preprocess_function = preprocess_functions[model_name]

@@ -5,7 +5,7 @@ This script provides a function for performing cross-validation on machine learn
 import numpy as np
 
 from src.data.preprocessing import preprocess_data
-from src.models.training import train_elasticnet_model, train_lightgbm_model, train_multinomialnb_model, train_sgdlinear_model
+from src.models.training import train_elasticnet_model, train_lightgbm_model, train_logisticregression_model, train_multinomialnb_model, train_sgdlinear_model
 from src.utils.functions import calculate_test_error
 
 
@@ -46,11 +46,17 @@ def cross_validate(data, cv, hyperparameters, task_name, model_name, metric_name
 		elif model_name in ['sgdlinear']:
 			model = train_sgdlinear_model([x_train, y_train, weight_train], hyperparameters, task_name)
 		
-		else:
+		elif model_name in ['elasticnet']:
 			model = train_elasticnet_model([x_train, y_train, weight_train], hyperparameters, task_name)
 		
-		# Calculate test error and add it to the list of errors
-		errors.append(calculate_test_error([x_test, y_test, weight_test], model, metric_name, task_name))
+		elif model_name in ['logisticregression']:
+			model = train_logisticregression_model([x_train, y_train, weight_train], hyperparameters, task_name)
+		
+		else:
+			model = None
+		
+		if model:
+			errors.append(calculate_test_error([x_test, y_test, weight_test], model, metric_name, task_name))
 	
 	# Calculate and return the mean and standard deviation of test errors
 	return np.nanmean(errors), np.nanstd(errors)

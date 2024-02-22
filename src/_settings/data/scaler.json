@@ -1,0 +1,29 @@
+{
+    "MaxAbsScaler": {},
+    "MinMaxScaler": {
+	"feature_range": ["categorical", [[-1, 1], [0, 1]]],
+	"clip": ["categorical", [true, false]]
+    },
+    "RobustScaler": {
+	"with_centering": [
+	    "categorical", [true, false]
+	],
+	"with_scaling": [
+	    "categorical", [true, false]
+	],
+	"quantile_range": [
+	    "categorical", [[0.25, 0.75], [0.20, 0.80], [0.15, 0.85], [0.10, 0.90], [0.05, 0.95]]
+	],
+	"unit_variance": [
+	    "categorical", [true, false]
+	]
+    },
+    "StandardScaler": {
+	"with_mean": [
+	    "categorical", [true, false]
+	],
+	"with_std": [
+	    "categorical", [true, false]
+	]
+    }
+}

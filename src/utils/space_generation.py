@@ -29,7 +29,7 @@ def load_optuna_parameters(file_path, _type, trial):
 			_, min_value, max_value, step_log = value
 			
 			if isinstance(step_log, int):
-				max_value = min_value + step_log ** np.floor((max_value - min_value) / step_log)
+				max_value = min_value + step_log * np.floor((max_value - min_value) / step_log)
 				parameters[key] = trial.suggest_int(key, min_value, max_value, step=step_log)
 			
 			elif isinstance(step_log, bool):
@@ -46,7 +46,7 @@ def load_optuna_parameters(file_path, _type, trial):
 			_, min_value, max_value, step_log = value
 			
 			if isinstance(step_log, float):
-				max_value = min_value + step_log ** np.floor((max_value - min_value) / step_log)
+				max_value = min_value + step_log * np.floor((max_value - min_value) / step_log)
 				parameters[key] = trial.suggest_float(key, min_value, max_value, step=step_log)
 			
 			elif isinstance(step_log, bool):
@@ -176,6 +176,16 @@ def elasticnet_long_parameters(trial):
 def elasticnet_short_parameters(trial):
 	return load_optuna_parameters('src/_settings/data/elasticnet.json', 'short', trial)
 
+
+def logisticregression_long_parameters(trial, n_jobs):
+	parameters = load_optuna_parameters('src/_settings/data/logisticregression.json', 'long', trial)
+	parameters['n_jobs'] = trial.suggest_categorical('n_jobs', [n_jobs])
+	
+	return parameters
+
+
+def logisticregression_short_parameters(trial):
+	return load_optuna_parameters('src/_settings/data/logisticregression.json', 'short', trial)
 
 # Function to generate parameters for MultinomialNB
 def multinomialnb_parameters(trial):
