@@ -1,5 +1,5 @@
 """
-This script defines a list of available machine learning models.
+This script defines a set of available machine learning models.
 """
 
 # List of available models

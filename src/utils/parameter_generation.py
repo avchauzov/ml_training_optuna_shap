@@ -53,6 +53,14 @@ def generate_hyperparameters(task_name, model_name, metric_name, trial, optimiza
 		elif optimization_type in ['short']:
 			parameters = lightgbm_short_parameters(trial)
 	
+	elif task_name == 'regression' and model_name == 'sgdlinear':
+		if optimization_type == 'long':
+			loss = ['squared_error', 'huber', 'epsilon_insensitive', 'squared_epsilon_insensitive']
+			penalty = ['l2', 'l1', 'elasticnet']
+			parameters = sgdlinear_long_parameters(trial, loss, penalty, n_jobs, optimization_type)
+		elif optimization_type == 'short':
+			parameters = sgdlinear_short_parameters(trial, optimization_type)
+	
 	elif task_name in ['classification_binary'] and model_name in ['sgdlinear']:
 		if optimization_type in ['long']:
 			loss = ['log_loss', 'modified_huber']

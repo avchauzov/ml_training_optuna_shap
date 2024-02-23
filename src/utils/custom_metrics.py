@@ -5,14 +5,14 @@ This module contains a function to calculate Symmetrical Mean Absolute Percentag
 import numpy as np
 
 
-def calculate_symmetrical_mape(y_true, y_pred, sample_weight):
+def s_mape(y_true, y_pred, sample_weight):
 	"""
 	Calculate Symmetrical Mean Absolute Percentage Error (sMAPE).
 
 	Args:
 		y_true (array-like): True target values.
 		y_pred (array-like): Predicted values.
-		sample_weight (array-like): Sample weights for each data point.
+		sample_weight (array-like): Sample weights for each optimization_hyperparameters point.
 
 	Returns:
 		float: Symmetrical Mean Absolute Percentage Error (sMAPE).

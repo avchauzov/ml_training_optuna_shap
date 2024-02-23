@@ -5,8 +5,14 @@ including hyperparameter optimization and pruning strategies.
 
 import optuna
 
-from src.models.cross_validation import cross_validate
+from src.models.cross_validation import calculate_cv_score
 
+
+'''def apply_pruning(hyperparameters):
+	if hyperparameters.get('num_leaves', 0) > (2 ** hyperparameters.get('max_depth', 0) * 0.75):
+		return True
+	
+	return False'''
 
 def perform_trial(data, cv, space, best_score_history, patience, task_name, model_name, metric_name, trial):
 	"""
@@ -26,35 +32,16 @@ def perform_trial(data, cv, space, best_score_history, patience, task_name, mode
 	Returns:
 		tuple: Mean and standard deviation of test errors from cross-validation.
 	"""
-	# https://github.com/optuna/optuna/issues/2021
-	
 	x_data, y_data, weight_data = data
 	
 	try:
 		best_value = trial.study.best_value
 		best_score_history.append(best_value)
-	
-	except ValueError as _:
+	except ValueError:
 		pass
 	
 	if len(best_score_history) >= patience:
 		if best_score_history[-1] == best_score_history[-patience]:
 			raise optuna.TrialPruned()
 	
-	return cross_validate([x_data, y_data, weight_data], cv, space, task_name, model_name, metric_name)
-
-
-def is_model_pruned(hyperparameters):
-	"""
-	Check if the model should be pruned based on hyperparameters.
-
-	Args:
-		hyperparameters (dict): Hyperparameters for the machine learning model.
-
-	Returns:
-		bool: True if the model should be pruned, False otherwise.
-	"""
-	if hyperparameters.get('num_leaves', 0) > (2 ** hyperparameters.get('max_depth', 0) * 0.75):
-		return True
-	
-	return False
+	return calculate_cv_score([x_data, y_data, weight_data], cv, space, task_name, model_name, metric_name)

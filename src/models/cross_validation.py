@@ -6,10 +6,10 @@ import numpy as np
 
 from src.data.preprocessing import preprocess_data
 from src.models.training import train_elasticnet_model, train_lightgbm_model, train_logisticregression_model, train_multinomialnb_model, train_sgdlinear_model
-from src.utils.functions import calculate_test_error
+from src.utils.metric_calculation import calculate_test_error
 
 
-def cross_validate(data, cv, hyperparameters, task_name, model_name, metric_name):
+def calculate_cv_score(data, cv, hyperparameters, task_name, model_name, metric_name):
 	"""
 	Perform cross-validation and return the mean and standard deviation of the test errors.
 
@@ -33,25 +33,20 @@ def cross_validate(data, cv, hyperparameters, task_name, model_name, metric_name
 		if 'scaler' in hyperparameters:
 			del hyperparameters['scaler']
 		
-		# Split data into training and test sets
+		# Preprocess data and split it into training and test sets
 		x_train, y_train, weight_train, x_test, y_test, weight_test = preprocess_data([x_data, y_data, weight_data], [train_index, test_index], scaler_name, model_name)
 		
 		# Train the model based on the model name
-		if model_name in ['lightgbm']:
+		if model_name == 'lightgbm':
 			model = train_lightgbm_model([x_train, y_train, weight_train], [x_test, y_test, weight_test], hyperparameters, task_name)
-		
-		elif model_name in ['multinomialnb']:
+		elif model_name == 'multinomialnb':
 			model = train_multinomialnb_model([x_train, y_train, weight_train], hyperparameters)
-		
-		elif model_name in ['sgdlinear']:
+		elif model_name == 'sgdlinear':
 			model = train_sgdlinear_model([x_train, y_train, weight_train], hyperparameters, task_name)
-		
-		elif model_name in ['elasticnet']:
+		elif model_name == 'elasticnet':
 			model = train_elasticnet_model([x_train, y_train, weight_train], hyperparameters, task_name)
-		
-		elif model_name in ['logisticregression']:
+		elif model_name == 'logisticregression':
 			model = train_logisticregression_model([x_train, y_train, weight_train], hyperparameters, task_name)
-		
 		else:
 			model = None
 		

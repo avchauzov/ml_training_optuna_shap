@@ -6,6 +6,57 @@ import json
 import numpy as np
 
 
+def elasticnet_long_parameters(trial):
+	return load_optuna_parameters('src/_settings/optimization_hyperparameters/elasticnet.json', 'long', trial)
+
+
+def elasticnet_short_parameters(trial):
+	return load_optuna_parameters('src/_settings/optimization_hyperparameters/elasticnet.json', 'short', trial)
+
+
+def lightgbm_long_parameters(trial, objective, metric, num_class, n_jobs):
+	"""
+	Generate LightGBM parameters for the 'long' configuration based on trial suggestions.
+
+	Args:
+		trial: Trial object for optimization.
+		objective (list): List of objective functions.
+		metric (list): List of evaluation metrics.
+		num_class (int): Number of classes for multiclass tasks.
+		n_jobs (int): Number of parallel jobs.
+
+	Returns:
+		dict: Dictionary of LightGBM hyperparameters.
+	"""
+	parameters = load_optuna_parameters('src/_settings/optimization_hyperparameters/lightgbm.json', 'long', trial)
+	
+	parameters.update(
+			{
+					'objective': trial.suggest_categorical('objective', objective),
+					'metric'   : trial.suggest_categorical('metric', metric),
+					'n_jobs'   : trial.suggest_categorical('n_jobs', [n_jobs])
+					}
+			)
+	
+	if num_class > 1:
+		parameters.update({'num_class': trial.suggest_categorical('num_class', [num_class])})
+	
+	return parameters
+
+
+# Function to generate LightGBM parameters for the 'short' configuration
+def lightgbm_short_parameters(trial):
+	"""
+	Generate LightGBM parameters for the 'short' configuration based on trial suggestions.
+
+	Args:
+		trial: Trial object for optimization.
+
+	Returns:
+		dict: Dictionary of LightGBM hyperparameters.
+	"""
+	return load_optuna_parameters('src/_settings/optimization_hyperparameters/lightgbm.json', 'short', trial)
+
 def load_optuna_parameters(file_path, _type, trial):
 	"""
 	Load parameters from a JSON file and convert them into Optuna suggest functions.
@@ -58,6 +109,31 @@ def load_optuna_parameters(file_path, _type, trial):
 	return parameters
 
 
+def logisticregression_long_parameters(trial, n_jobs):
+	parameters = load_optuna_parameters('src/_settings/optimization_hyperparameters/logisticregression.json', 'long', trial)
+	parameters['n_jobs'] = trial.suggest_categorical('n_jobs', [n_jobs])
+	
+	return parameters
+
+
+def logisticregression_short_parameters(trial):
+	return load_optuna_parameters('src/_settings/optimization_hyperparameters/logisticregression.json', 'short', trial)
+
+
+# Function to generate parameters for MultinomialNB
+def multinomialnb_parameters(trial):
+	"""
+	Generate parameters for MultinomialNB based on trial suggestions.
+
+	Args:
+		trial: Trial object for optimization.
+
+	Returns:
+		dict: Dictionary of MultinomialNB hyperparameters.
+	"""
+	return load_optuna_parameters('src/_settings/optimization_hyperparameters/multinomialnb.json', 'long', trial)
+
+
 # Function to set LightGBM production mode parameters based on trial suggestions
 def set_lightgbm_production_mode_parameters(parameters, trial):
 	"""
@@ -70,53 +146,12 @@ def set_lightgbm_production_mode_parameters(parameters, trial):
 	Returns:
 		dict: Updated dictionary of hyperparameters.
 	"""
-	parameters.update(load_optuna_parameters('src/_settings/data/lightgbm.json', 'gpu', trial))
+	parameters.update(load_optuna_parameters('src/_settings/optimization_hyperparameters/lightgbm.json', 'gpu', trial))
 	return parameters
 
 
 # Function to generate LightGBM parameters for the 'long' configuration
-def lightgbm_long_parameters(trial, objective, metric, num_class, n_jobs):
-	"""
-	Generate LightGBM parameters for the 'long' configuration based on trial suggestions.
 
-	Args:
-		trial: Trial object for optimization.
-		objective (list): List of objective functions.
-		metric (list): List of evaluation metrics.
-		num_class (int): Number of classes for multiclass tasks.
-		n_jobs (int): Number of parallel jobs.
-
-	Returns:
-		dict: Dictionary of LightGBM hyperparameters.
-	"""
-	parameters = load_optuna_parameters('src/_settings/data/lightgbm.json', 'long', trial)
-	
-	parameters.update(
-			{
-					'objective': trial.suggest_categorical('objective', objective),
-					'metric'   : trial.suggest_categorical('metric', metric),
-					'n_jobs'   : trial.suggest_categorical('n_jobs', [n_jobs])
-					}
-			)
-	
-	if num_class > 1:
-		parameters.update({'num_class': trial.suggest_categorical('num_class', [num_class])})
-	
-	return parameters
-
-
-# Function to generate LightGBM parameters for the 'short' configuration
-def lightgbm_short_parameters(trial):
-	"""
-	Generate LightGBM parameters for the 'short' configuration based on trial suggestions.
-
-	Args:
-		trial: Trial object for optimization.
-
-	Returns:
-		dict: Dictionary of LightGBM hyperparameters.
-	"""
-	return load_optuna_parameters('src/_settings/data/lightgbm.json', 'short', trial)
 
 
 # Function to generate SGDLinear parameters for the 'long' configuration
@@ -134,7 +169,7 @@ def sgdlinear_long_parameters(trial, loss, penalty, n_jobs, task_name):
 	Returns:
 		dict: Dictionary of SGDLinear hyperparameters.
 	"""
-	parameters = load_optuna_parameters('src/_settings/data/sgdlinear.json', 'long', trial)
+	parameters = load_optuna_parameters('src/_settings/optimization_hyperparameters/sgdlinear.json', 'long', trial)
 	
 	parameters.update(
 			{
@@ -144,7 +179,7 @@ def sgdlinear_long_parameters(trial, loss, penalty, n_jobs, task_name):
 			)
 	
 	if task_name.startswith('classification'):
-		parameters.update(load_optuna_parameters('src/_settings/data/sgdlinear.json', 'classification', trial))
+		parameters.update(load_optuna_parameters('src/_settings/optimization_hyperparameters/sgdlinear.json', 'classification', trial))
 		parameters.update(
 				{
 						'n_jobs': trial.suggest_categorical('n_jobs', [n_jobs])
@@ -166,36 +201,4 @@ def sgdlinear_short_parameters(trial, task_name):
 	Returns:
 		dict: Dictionary of SGDLinear hyperparameters.
 	"""
-	return load_optuna_parameters('src/_settings/data/sgdlinear.json', 'short', trial)
-
-
-def elasticnet_long_parameters(trial):
-	return load_optuna_parameters('src/_settings/data/elasticnet.json', 'long', trial)
-
-
-def elasticnet_short_parameters(trial):
-	return load_optuna_parameters('src/_settings/data/elasticnet.json', 'short', trial)
-
-
-def logisticregression_long_parameters(trial, n_jobs):
-	parameters = load_optuna_parameters('src/_settings/data/logisticregression.json', 'long', trial)
-	parameters['n_jobs'] = trial.suggest_categorical('n_jobs', [n_jobs])
-	
-	return parameters
-
-
-def logisticregression_short_parameters(trial):
-	return load_optuna_parameters('src/_settings/data/logisticregression.json', 'short', trial)
-
-# Function to generate parameters for MultinomialNB
-def multinomialnb_parameters(trial):
-	"""
-	Generate parameters for MultinomialNB based on trial suggestions.
-
-	Args:
-		trial: Trial object for optimization.
-
-	Returns:
-		dict: Dictionary of MultinomialNB hyperparameters.
-	"""
-	return load_optuna_parameters('src/_settings/data/multinomialnb.json', 'long', trial)
+	return load_optuna_parameters('src/_settings/optimization_hyperparameters/sgdlinear.json', 'short', trial)

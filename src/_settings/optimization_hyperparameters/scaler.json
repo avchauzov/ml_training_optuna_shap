@@ -1,8 +1,12 @@
 {
     "MaxAbsScaler": {},
     "MinMaxScaler": {
-	"feature_range": ["categorical", [[-1, 1], [0, 1]]],
-	"clip": ["categorical", [true, false]]
+	"feature_range": [
+	    "categorical", [[-1, 1], [0, 1]]
+	],
+	"clip": [
+	    "categorical", [true, false]
+	]
     },
     "RobustScaler": {
 	"with_centering": [

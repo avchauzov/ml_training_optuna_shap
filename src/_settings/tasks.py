@@ -1,5 +1,5 @@
 """
-This module defines a dictionary 'TASKS' that maps task names to corresponding metrics.
+This module defines a dictionary `TASKS` that associates task names with corresponding evaluation metrics.
 """
 
 # Dictionary that maps task names to corresponding metrics

@@ -12,9 +12,6 @@
 	"solver": [
 	    "categorical", ["lbfgs", "liblinear", "newton-cg", "newton-cholesky", "sag", "saga"]
 	],
-	"scaler": [
-	    "categorical", ["MaxAbsScaler", "MinMaxScaler", "RobustScaler", "StandardScaler"]
-	],
 	"C": [
 	    "float", 1e-3, 128.0, true
 	],

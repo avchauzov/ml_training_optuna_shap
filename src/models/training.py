@@ -8,6 +8,24 @@ from sklearn.linear_model import ElasticNet, LogisticRegression, SGDClassifier, 
 from sklearn.naive_bayes import MultinomialNB
 
 
+def train_elasticnet_model(data, hyperparameters, task_name):
+	"""
+	Train an ElasticNet model based on the task and hyperparameters.
+
+	Args:
+		data (list): List containing x_train, y_train, and sample_weight_train.
+		hyperparameters (dict): Hyperparameters for the ElasticNet model.
+		task_name (str): Task name.
+
+	Returns:
+		model: Trained ElasticNet model.
+	"""
+	x_train, y_train, sample_weight_train = data
+	
+	model = ElasticNet(**hyperparameters)
+	model.fit(x_train, y_train, sample_weight=sample_weight_train)
+	return model
+
 def train_lightgbm_model(data_train, data_test, hyperparameters, task_name):
 	"""
 	Train a LightGBM model based on the task and hyperparameters.
@@ -54,6 +72,30 @@ def train_lightgbm_model(data_train, data_test, hyperparameters, task_name):
 	return model
 
 
+def train_logisticregression_model(data, hyperparameters, task_name):
+	"""
+	Train a Logistic Regression model based on the task and hyperparameters.
+
+	Args:
+		data (list): List containing x_train, y_train, and sample_weight_train.
+		hyperparameters (dict): Hyperparameters for the Logistic Regression model.
+		task_name (str): Task name.
+
+	Returns:
+		model: Trained Logistic Regression model, or None if training fails.
+	"""
+	x_train, y_train, sample_weight_train = data
+	
+	model = LogisticRegression(**hyperparameters)
+	
+	try:
+		model.fit(x_train, y_train, sample_weight=sample_weight_train)
+	except Exception as error:
+		model = None
+	
+	return model
+
+
 def train_multinomialnb_model(data, hyperparameters):
 	"""
 	Train a Multinomial Naive Bayes model.
@@ -92,27 +134,4 @@ def train_sgdlinear_model(data, hyperparameters, task_name):
 		model = SGDClassifier(**hyperparameters)
 	
 	model.fit(x_train, y_train, sample_weight=sample_weight_train)
-	return model
-
-
-def train_elasticnet_model(data, hyperparameters, task_name):
-	x_train, y_train, sample_weight_train = data
-	
-	model = ElasticNet(**hyperparameters)
-	
-	model.fit(x_train, y_train, sample_weight=sample_weight_train)
-	return model
-
-
-def train_logisticregression_model(data, hyperparameters, task_name):
-	x_train, y_train, sample_weight_train = data
-	
-	model = LogisticRegression(**hyperparameters)
-	
-	try:
-		model.fit(x_train, y_train, sample_weight=sample_weight_train)
-	
-	except Exception as error:
-		model = None
-	
 	return model

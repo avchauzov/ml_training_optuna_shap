@@ -4,56 +4,8 @@ This module contains functions for data preprocessing.
 
 from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler, RobustScaler, StandardScaler
 
-from src.data.loading import split_data
 
-
-def preprocess_data_lightgbm(data, index, fillna=True):
-	"""
-	Preprocess data for LightGBM model.
-
-	Args:
-		data (list): List containing x_data, y_data, and weight_data.
-		index (list): List containing train_index and test_index.
-		fillna (bool, optional): Whether to fill NaN values. Default is True.
-
-	Returns:
-		tuple: A tuple containing x_train, y_train, weight_train, x_test, y_test, and weight_test.
-	"""
-	return filling_and_scaling_data(data, index, fillna=fillna)
-
-
-def preprocess_data_multinomialnb(data, index, fillna=True):
-	"""
-	Preprocess data for MultinomialNB model.
-
-	Args:
-		data (list): List containing x_data, y_data, and weight_data.
-		index (list): List containing train_index and test_index.
-		fillna (bool, optional): Whether to fill NaN values. Default is True.
-
-	Returns:
-		tuple: A tuple containing x_train, y_train, weight_train, x_test, y_test, and weight_test.
-	"""
-	return filling_and_scaling_data(data, index, fillna=fillna)
-
-
-def preprocess_data_linear(data, index, scaler_name, fillna=True):
-	"""
-	Preprocess data for SGDLinear model.
-
-	Args:
-		data (list): List containing x_data, y_data, and weight_data.
-		index (list): List containing train_index and test_index.
-		fillna (bool, optional): Whether to fill NaN values. Default is True.
-		scale (bool, optional): Whether to scale data. Default is True.
-
-	Returns:
-		tuple: A tuple containing x_train, y_train, weight_train, x_test, y_test, and weight_test.
-	"""
-	return filling_and_scaling_data(data, index, scaler_name, fillna=fillna)
-
-
-def filling_and_scaling_data(data, index, scaler_name=None, fillna=True):
+def fill_and_scale_data(data, index, scaler_name=None, fillna=True):
 	"""
 	Fill NaN values and scale data.
 
@@ -61,13 +13,13 @@ def filling_and_scaling_data(data, index, scaler_name=None, fillna=True):
 		data (list): List containing x_data, y_data, and weight_data.
 		index (list): List containing train_index and test_index.
 		fillna (bool, optional): Whether to fill NaN values. Default is True.
-		scale (bool, optional): Whether to scale data. Default is False.
+		scaler_name (str, optional): Name of the scaler to use. Default is None.
 
 	Returns:
 		tuple: A tuple containing x_train, y_train, weight_train, x_test, y_test, and weight_test.
 	"""
-	x_train, y_train, weight_train, x_test, y_test, weight_test = split_data(data, index)
-	x_train, x_test = common_columns_selection(x_train, x_test)
+	x_train, y_train, weight_train, x_test, y_test, weight_test = split_data_by_index(data, index)
+	x_train, x_test = select_common_columns(x_train, x_test)
 	
 	if fillna:
 		fillna_df = x_train.mean()
@@ -84,7 +36,6 @@ def filling_and_scaling_data(data, index, scaler_name=None, fillna=True):
 				'RobustScaler'  : RobustScaler(),
 				'StandardScaler': StandardScaler()
 				}
-		
 		scaler = scaler_functions.get(scaler_name)
 		x_train = scaler.fit_transform(x_train)
 		x_test = scaler.transform(x_test)
@@ -92,7 +43,81 @@ def filling_and_scaling_data(data, index, scaler_name=None, fillna=True):
 	return x_train, y_train, weight_train, x_test, y_test, weight_test
 
 
-def common_columns_selection(x_train, x_test):
+def preprocess_data(data, index, scaler_name, model_name):
+	"""
+	Preprocess data based on the specified model.
+
+	Args:
+		data (tuple): Tuple containing x_data, y_data, and weight_data.
+		index (tuple): Tuple containing train_index and test_index.
+		scaler_name (str): Name of the scaler to use.
+		model_name (str): Name of the model.
+
+	Returns:
+		tuple: A tuple containing x_train, y_train, weight_train, x_test, y_test, and weight_test.
+	"""
+	x_data, y_data, weight_data = data
+	train_index, test_index = index
+	
+	preprocess_functions = {
+			'lightgbm'     : preprocess_data_lightgbm,
+			'multinomialnb': preprocess_data_multinomialnb,
+			'sgdlinear': preprocess_data_linear,
+			'elasticnet'        : preprocess_data_linear,
+			'logisticregression': preprocess_data_linear
+			}
+	
+	preprocess_function = preprocess_functions[model_name]
+	return preprocess_function([x_data, y_data, weight_data], [train_index, test_index], scaler_name)
+
+
+def preprocess_data_lightgbm(data, index, fillna=True):
+	"""
+	Preprocess data for LightGBM model.
+
+	Args:
+		data (list): List containing x_data, y_data, and weight_data.
+		index (list): List containing train_index and test_index.
+		fillna (bool, optional): Whether to fill NaN values. Default is True.
+
+	Returns:
+		tuple: A tuple containing x_train, y_train, weight_train, x_test, y_test, and weight_test.
+	"""
+	return fill_and_scale_data(data, index, fillna=fillna)
+
+
+def preprocess_data_linear(data, index, scaler_name, fillna=True):
+	"""
+	Preprocess data for linear models.
+
+	Args:
+		data (list): List containing x_data, y_data, and weight_data.
+		index (list): List containing train_index and test_index.
+		fillna (bool, optional): Whether to fill NaN values. Default is True.
+		scaler_name (str, optional): Name of the scaler to use. Default is None.
+
+	Returns:
+		tuple: A tuple containing x_train, y_train, weight_train, x_test, y_test, and weight_test.
+	"""
+	return fill_and_scale_data(data, index, scaler_name, fillna=fillna)
+
+
+def preprocess_data_multinomialnb(data, index, fillna=True):
+	"""
+	Preprocess data for MultinomialNB model.
+
+	Args:
+		data (list): List containing x_data, y_data, and weight_data.
+		index (list): List containing train_index and test_index.
+		fillna (bool, optional): Whether to fill NaN values. Default is True.
+
+	Returns:
+		tuple: A tuple containing x_train, y_train, weight_train, x_test, y_test, and weight_test.
+	"""
+	return fill_and_scale_data(data, index, fillna=fillna)
+
+
+def select_common_columns(x_train, x_test):
 	"""
 	Select common columns between training and test data.
 
@@ -109,14 +134,13 @@ def common_columns_selection(x_train, x_test):
 	return x_train, x_test
 
 
-def preprocess_data(data, index, scaler_name, model_name):
+def split_data_by_index(data, index):
 	"""
-	Preprocess data based on the specified model.
+	Split the data into training and test sets based on provided indices.
 
 	Args:
-		data (tuple): Tuple containing x_data, y_data, and weight_data.
-		index (tuple): Tuple containing train_index and test_index.
-		model_name (str): Name of the model.
+		data (list): List containing x_data, y_data, and weight_data.
+		index (list): List containing train_index and test_index.
 
 	Returns:
 		tuple: A tuple containing x_train, y_train, weight_train, x_test, y_test, and weight_test.
@@ -124,17 +148,14 @@ def preprocess_data(data, index, scaler_name, model_name):
 	x_data, y_data, weight_data = data
 	train_index, test_index = index
 	
-	preprocess_functions = {
-			'lightgbm'     : preprocess_data_lightgbm,
-			'multinomialnb': preprocess_data_multinomialnb,
-			'sgdlinear' : preprocess_data_linear,
-			'elasticnet'        : preprocess_data_linear,
-			'logisticregression': preprocess_data_linear
-			}
+	# Select training data
+	x_train = x_data.iloc[train_index]
+	y_train = y_data[train_index]
+	weight_train = weight_data[train_index]
 	
-	preprocess_function = preprocess_functions[model_name]
-	x_train, y_train, weight_train, x_test, y_test, weight_test = preprocess_function(
-			[x_data, y_data, weight_data], [train_index, test_index], scaler_name
-				)
+	# Select test data
+	x_test = x_data.iloc[test_index]
+	y_test = y_data[test_index]
+	weight_test = weight_data[test_index]
 	
 	return x_train, y_train, weight_train, x_test, y_test, weight_test

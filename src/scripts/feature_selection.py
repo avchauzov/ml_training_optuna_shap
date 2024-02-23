@@ -8,66 +8,23 @@ import pandas as pd
 import shap
 from tqdm import tqdm
 
-from src._settings.metrics import METRIC_FUNCTIONS
+from src._settings.metrics import METRICS
 from src.data.preprocessing import preprocess_data
 from src.models.training import train_elasticnet_model, train_lightgbm_model, train_logisticregression_model, train_sgdlinear_model
-from src.utils.functions import calculate_test_error
+from src.utils.metric_calculation import calculate_test_error
 
 
-def calculate_error_metrics(errors):
-	"""
-	Calculate error metrics.
-
-	Args:
-		errors (tuple): A tuple containing train and test errors.
-
-	Returns:
-		dict: A dictionary containing mean and standard deviation of train and test errors.
-	"""
+'''def calculate_error_metrics(errors):
 	train_error, test_error = errors
 	return {
 			'train_error_mean': np.nanmean(train_error),
 			'train_error_std' : np.nanstd(train_error),
 			'test_error_mean' : np.nanmean(test_error),
 			'test_error_std'  : np.nanstd(test_error),
-			}
+			}'''
 
 
-def report_generation(error, selected, metric_name):
-	"""
-	Generate a report based on errors, selected columns, and metric name.
-
-	Args:
-		error (list): A list containing train and test errors.
-		selected (list): List of selected columns.
-		metric_name (str): Name of the metric.
-
-	Returns:
-		list: Sorted list of selected columns.
-	"""
-	train_error, test_error = error
-	
-	report_df = pd.DataFrame()
-	report_df['Train Error'] = [np.nanmean(value) for value in train_error]
-	report_df['Test Error'] = [np.nanmean(value) for value in test_error]
-	report_df['Number of Columns'] = [len(value) for value in selected]
-	
-	direction = True if METRIC_FUNCTIONS[metric_name][0] in ['minimize'] else False
-	report_df = report_df.sort_values(['Test Error', 'Number of Columns', 'Train Error'], ascending=[direction, True, direction])
-	
-	columns_to_select_list = sorted(report_df.index)
-	table = report_df.to_string(index=False, header=True, justify='center')
-	
-	# Add dashes before and after the table
-	dashes = '-' * len(table.split('\n')[0])
-	formatted_table = f'{dashes}\n{table}\n{dashes}'
-	
-	print(formatted_table)
-	
-	return selected[report_df.index[0]]
-
-
-def shap_values_calculation(task_name, model_name, metric_name, data, index, error, hyperparameters, x_values, shap_values):
+def calculate_shap_values(task_name, model_name, metric_name, data, index, error, hyperparameters, x_values, shap_values):
 	"""
 	Calculate SHAP values for feature selection.
 
@@ -99,19 +56,12 @@ def shap_values_calculation(task_name, model_name, metric_name, data, index, err
 	
 	if model_name in ['sgdlinear']:
 		model = train_sgdlinear_model([x_train, y_train, weight_train], hyperparameters, task_name)
-	
 	elif model_name in ['elasticnet']:
 		model = train_elasticnet_model([x_train, y_train, weight_train], hyperparameters, task_name)
-	
 	elif model_name in ['lightgbm']:
-		model = train_lightgbm_model(
-				[x_train, y_train, weight_train], [x_test, y_test, weight_test],
-				hyperparameters, task_name
-				)
-	
+		model = train_lightgbm_model([x_train, y_train, weight_train], [x_test, y_test, weight_test], hyperparameters, task_name)
 	elif model_name in ['logisticregression']:
 		model = train_logisticregression_model([x_train, y_train, weight_train], hyperparameters, task_name)
-	
 	else:
 		model = None
 	
@@ -131,7 +81,41 @@ def shap_values_calculation(task_name, model_name, metric_name, data, index, err
 	shap_values.extend(shap_sub_values)
 
 
-def feature_selection(data, cv, hyperparameters, drop_rate, min_columns_to_keep, task_name, model_name, metric_name):
+def generate_report(error, selected, metric_name):
+	"""
+	Generate a report based on errors, selected columns, and metric name.
+
+	Args:
+		error (list): A list containing train and test errors.
+		selected (list): List of selected columns.
+		metric_name (str): Name of the metric.
+
+	Returns:
+		list: Sorted list of selected columns.
+	"""
+	train_error, test_error = error
+	
+	report_df = pd.DataFrame()
+	report_df['Train Error'] = [np.nanmean(value) for value in train_error]
+	report_df['Test Error'] = [np.nanmean(value) for value in test_error]
+	report_df['Number of Columns'] = [len(value) for value in selected]
+	
+	direction = True if METRICS[metric_name][0] in ['minimize'] else False
+	report_df = report_df.sort_values(['Test Error', 'Number of Columns', 'Train Error'], ascending=[direction, True, direction])
+	
+	columns_to_select_list = sorted(report_df.index)
+	table = report_df.to_string(index=False, header=True, justify='center')
+	
+	# Add dashes before and after the table
+	dashes = '-' * len(table.split('\n')[0])
+	formatted_table = f'{dashes}\n{table}\n{dashes}'
+	
+	print(formatted_table)
+	
+	return selected[report_df.index[0]]
+
+
+def select_important_features(data, cv, hyperparameters, drop_rate, min_columns_to_keep, task_name, model_name, metric_name):
 	"""
 	Perform feature selection using SHAP values.
 
@@ -163,7 +147,7 @@ def feature_selection(data, cv, hyperparameters, drop_rate, min_columns_to_keep,
 			_index, x_values, shap_values = [], [], []
 			
 			for index, (train_index, test_index) in enumerate(cv):
-				shap_values_calculation(
+				calculate_shap_values(
 						task_name, model_name, metric_name,
 						[x_data[selected], y_data, weight_data], [train_index, test_index],
 						[train_error, test_error], hyperparameters, x_values, shap_values
@@ -195,7 +179,7 @@ def feature_selection(data, cv, hyperparameters, drop_rate, min_columns_to_keep,
 					)
 			drop_count = int(np.ceil(shap_values_df.shape[0] * drop_rate))
 			
-			important = sorted(shap_values_df.index.values[: -drop_count])
+			important = sorted(shap_values_df.index.values[:-drop_count])
 			not_important = sorted(shap_values_df.index.values[-drop_count:])
 			
 			selected_cv.append(important)
@@ -211,4 +195,4 @@ def feature_selection(data, cv, hyperparameters, drop_rate, min_columns_to_keep,
 	
 	time.sleep(1)
 	print()  # Print a newline after completing the progress bar
-	return report_generation([train_error_cv, test_error_cv], selected_cv, metric_name)
+	return generate_report([train_error_cv, test_error_cv], selected_cv, metric_name)

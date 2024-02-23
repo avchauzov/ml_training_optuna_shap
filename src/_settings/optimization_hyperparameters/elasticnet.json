@@ -6,9 +6,6 @@
 	"selection": [
 	    "categorical", ["cyclic", "random"]
 	],
-	"scaler": [
-	    "categorical", ["MaxAbsScaler", "MinMaxScaler", "RobustScaler", "StandardScaler"]
-	],
 	"alpha": [
 	    "float", 1e-3, 128.0, true
 	],

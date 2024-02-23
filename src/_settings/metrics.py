@@ -1,5 +1,5 @@
 """
-This script defines various evaluation metrics and associated functions for optimization tasks. It also provides a dictionary `METRIC_FUNCTIONS` that maps metric names to optimization directions and corresponding metric functions.
+This script defines various evaluation metrics and associated functions for optimization tasks. It also provides a dictionary `METRICS` that maps metric names to optimization directions and corresponding metric functions.
 """
 
 from sklearn.metrics import (
@@ -11,14 +11,14 @@ from sklearn.metrics import (
 	roc_auc_score,
 	)
 
-from src._settings.custom_metrics import calculate_symmetrical_mape
+from src.utils.custom_metrics import s_mape
 
 
 # Dictionary mapping metric names to optimization directions and corresponding metric functions
-METRIC_FUNCTIONS = {
+METRICS = {
 		'neg_mean_absolute_error': ['minimize', mean_absolute_error],
 		'neg_mean_squared_error' : ['minimize', mean_squared_error],
-		'sMAPE'                  : ['minimize', calculate_symmetrical_mape],
+		'sMAPE': ['minimize', s_mape],
 		'neg_log_loss'           : ['minimize', log_loss],
 		'average_precision'      : ['maximize', lambda y_true, y_pred, sample_weight: average_precision_score(y_true=y_true, y_score=y_pred, sample_weight=sample_weight)],
 		'roc_auc'                : ['maximize', lambda y_true, y_pred, sample_weight: roc_auc_score(y_true=y_true, y_score=y_pred, sample_weight=sample_weight)],
