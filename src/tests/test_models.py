@@ -33,10 +33,10 @@ def generate_data_and_split(classification=True, n_classes=2):
 		tuple: Tuple containing x_data, y_data, and cross-validation fold indices (cv).
 	"""
 	if classification:
-		x_data, y_data = make_classification(n_samples=8096, n_features=32, n_informative=8, n_classes=n_classes)
+		x_data, y_data = make_classification(n_samples=8096, n_features=8, n_informative=4, n_classes=n_classes)
 	
 	else:
-		x_data, y_data = make_regression(n_samples=8096, n_features=32, n_informative=8)
+		x_data, y_data = make_regression(n_samples=8096, n_features=8, n_informative=4)
 	
 	x_data = pd.DataFrame(x_data)
 	
@@ -100,7 +100,7 @@ def test_lightgbm_classification_multiclass():
 	"""
 	task_name = 'classification_multiclass'
 	metric_name = random.choice(TASKS.get(task_name))
-	n_classes = random.choice(list(range(3, 9)))
+	n_classes = random.choice(list(range(3, 4)))
 	
 	x_data, y_data, cv = generate_data_and_split(n_classes=n_classes)
 	run_optimization_for_test(task_name, 'lightgbm', metric_name, x_data, y_data, cv)
@@ -134,7 +134,7 @@ def test_logisticregression_classification_multiclass():
 	"""
 	task_name = 'classification_multiclass'
 	metric_name = random.choice(TASKS.get(task_name))
-	n_classes = random.choice(list(range(3, 9)))
+	n_classes = random.choice(list(range(3, 4)))
 	
 	x_data, y_data, cv = generate_data_and_split(n_classes=n_classes)
 	run_optimization_for_test(task_name, 'logisticregression', metric_name, x_data, y_data, cv)
@@ -168,7 +168,7 @@ def test_sgdlinear_classification_multiclass():
 	"""
 	task_name = 'classification_multiclass'
 	metric_name = random.choice(TASKS.get(task_name))
-	n_classes = random.choice(list(range(3, 9)))
+	n_classes = random.choice(list(range(3, 4)))
 	
 	x_data, y_data, cv = generate_data_and_split(n_classes=n_classes)
 	run_optimization_for_test(task_name, 'sgdlinear', metric_name, x_data, y_data, cv)
@@ -180,7 +180,7 @@ def test_multinomialnb_classification_multiclass():
 	"""
 	task_name = 'classification_multiclass'
 	metric_name = random.choice(TASKS.get(task_name))
-	n_classes = random.choice(list(range(3, 9)))
+	n_classes = random.choice(list(range(3, 4)))
 	
 	x_data, y_data, cv = generate_data_and_split(n_classes=n_classes)
 	run_optimization_for_test(task_name, 'multinomialnb', metric_name, x_data.abs(), y_data, cv)

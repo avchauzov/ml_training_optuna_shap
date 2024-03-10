@@ -9,6 +9,66 @@ from src.utils.space_generation import (
 
 
 def generate_hyperparameters(task_name, model_name, metric_name, trial, optimization_type, num_class, n_jobs, test_mode):
+	parameter_generators = {
+			('lightgbm', 'long')           : lambda: lightgbm_long_parameters(trial, get_objective(model_name, task_name, metric_name), get_metric(task_name), task_name, num_class, n_jobs),
+			('lightgbm', 'short')          : lambda: lightgbm_short_parameters(trial),
+			('sgdlinear', 'long')          : lambda: sgdlinear_long_parameters(trial, get_loss(model_name, task_name), ['l2', 'l1', 'elasticnet'], n_jobs, optimization_type),
+			('sgdlinear', 'short')         : lambda: sgdlinear_short_parameters(trial, optimization_type),
+			('elasticnet', 'long')         : lambda: elasticnet_long_parameters(trial),
+			('elasticnet', 'short')        : lambda: elasticnet_short_parameters(trial),
+			('logisticregression', 'long') : lambda: logisticregression_long_parameters(trial, n_jobs),
+			('logisticregression', 'short'): lambda: logisticregression_short_parameters(trial),
+			('multinomialnb', 'long')      : lambda: multinomialnb_parameters(trial),
+			}
+	
+	generator = parameter_generators.get((model_name, optimization_type), lambda: {})
+	parameters = generator()
+	
+	if not test_mode and model_name == 'lightgbm' and optimization_type == 'long':
+		parameters = set_lightgbm_production_mode_parameters(parameters, trial)
+	
+	return parameters
+
+
+def get_objective(model_name, task_name, metric_name):
+	if model_name == 'lightgbm':
+		if task_name == 'classification_binary':
+			return ['binary']
+		
+		elif task_name == 'classification_multiclass':
+			return ['multiclass'] if metric_name in ['roc_auc_ovo', 'roc_auc_ovr'] else ['multiclass', 'multiclassova']
+		
+		elif task_name == 'regression':
+			return ['regression', 'regression_l1', 'huber', 'fair', 'quantile', 'mape']
+	
+	return []
+
+
+def get_metric(task_name):
+	if task_name == 'classification_binary':
+		return ['auc', 'logloss', 'error']
+	
+	elif task_name == 'classification_multiclass':
+		return ['auc_mu', 'multi_logloss', 'multi_error']
+	
+	elif task_name == 'regression':
+		return ['l1', 'l2', 'rmse']
+	
+	return []
+
+
+def get_loss(model_name, task_name):
+	if model_name == 'sgdlinear':
+		if task_name in ['classification_binary', 'classification_multiclass']:
+			return ['log_loss', 'modified_huber']
+		
+		elif task_name == 'regression':
+			return ['squared_error', 'huber']
+	
+	return []
+
+
+'''def generate_hyperparameters(task_name, model_name, metric_name, trial, optimization_type, num_class, n_jobs, test_mode):
 	"""
 	Generate hyperparameters based on task, model, and optimization type.
 
@@ -96,4 +156,4 @@ def generate_hyperparameters(task_name, model_name, metric_name, trial, optimiza
 	if not test_mode and model_name in ['lightgbm'] and optimization_type in ['long']:
 		parameters = set_lightgbm_production_mode_parameters(parameters, trial)
 	
-	return parameters
+	return parameters'''

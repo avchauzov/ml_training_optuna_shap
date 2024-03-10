@@ -14,7 +14,7 @@ def elasticnet_short_parameters(trial):
 	return load_optuna_parameters('src/_settings/optimization_hyperparameters/elasticnet.json', 'short', trial)
 
 
-def lightgbm_long_parameters(trial, objective, metric, num_class, n_jobs):
+def lightgbm_long_parameters(trial, objective, metric, task_name, num_class, n_jobs):
 	"""
 	Generate LightGBM parameters for the 'long' configuration based on trial suggestions.
 
@@ -38,7 +38,7 @@ def lightgbm_long_parameters(trial, objective, metric, num_class, n_jobs):
 					}
 			)
 	
-	if num_class > 1:
+	if task_name == 'classification_multiclass':
 		parameters.update({'num_class': trial.suggest_categorical('num_class', [num_class])})
 	
 	return parameters
