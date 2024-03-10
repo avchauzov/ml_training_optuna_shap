@@ -3,58 +3,24 @@ This script provides functions for training machine learning models including Li
 and Stochastic Gradient Descent (SGD) Linear models.
 """
 
-import lightgbm
+from lightgbm import early_stopping, LGBMClassifier, LGBMRegressor, log_evaluation
 from sklearn.linear_model import ElasticNet, LogisticRegression, SGDClassifier, SGDRegressor
 from sklearn.naive_bayes import MultinomialNB
 
 
-def train_elasticnet_model(data, hyperparameters, task_name):
-	"""
-	Train an ElasticNet model based on the task and hyperparameters.
-
-	Args:
-		data (list): List containing x_train, y_train, and sample_weight_train.
-		hyperparameters (dict): Hyperparameters for the ElasticNet model.
-		task_name (str): Task name.
-
-	Returns:
-		model: Trained ElasticNet model.
-	"""
-	x_train, y_train, sample_weight_train = data
-	
-	model = ElasticNet(**hyperparameters)
-	model.fit(x_train, y_train, sample_weight=sample_weight_train)
-	return model
-
-def train_lightgbm_model(data_train, data_test, hyperparameters, task_name):
-	"""
-	Train a LightGBM model based on the task and hyperparameters.
-
-	Args:
-		data_train (list): List containing x_train, y_train, and sample_weight_train.
-		data_test (list): List containing x_test, y_test, and sample_weight_test.
-		hyperparameters (dict): Hyperparameters for the LightGBM model.
-		task_name (str): Task name.
-
-	Returns:
-		model: Trained LightGBM model.
-	"""
+def train_lightgbm_model(model, data):
+	data_train, data_test = data[: 3], data[3:]
 	x_train, y_train, sample_weight_train = data_train
 	x_test, y_test, sample_weight_test = data_test
 	
-	if task_name in ['regression']:
-		model = lightgbm.LGBMRegressor(**hyperparameters)
-	else:
-		model = lightgbm.LGBMClassifier(**hyperparameters)
-	
-	if hyperparameters['boosting_type'] in ['dart']:
+	if model.boosting_type in ['dart']:
 		model.fit(
 				x_train, y_train,
 				sample_weight=sample_weight_train,
 				eval_set=[(x_test, y_test), (x_train, y_train)],
 				eval_sample_weight=[sample_weight_test, sample_weight_train],
-				eval_metric=hyperparameters['metric'],
-				callbacks=[lightgbm.log_evaluation(period=-1, show_stdv=False)]
+				eval_metric=model.metric,
+				callbacks=[log_evaluation(period=-1, show_stdv=False)]
 				)
 	else:
 		model.fit(
@@ -62,76 +28,47 @@ def train_lightgbm_model(data_train, data_test, hyperparameters, task_name):
 				sample_weight=sample_weight_train,
 				eval_set=[(x_test, y_test), (x_train, y_train)],
 				eval_sample_weight=[sample_weight_test, sample_weight_train],
-				eval_metric=hyperparameters['metric'],
+				eval_metric=model.metric,
 				callbacks=[
-						lightgbm.early_stopping(int(hyperparameters['n_estimators'] * 0.10), verbose=False),
-						lightgbm.log_evaluation(period=-1, show_stdv=False)
+						early_stopping(int(model.n_estimators * 0.10), verbose=False),
+						log_evaluation(period=-1, show_stdv=False)
 						]
 				)
 	
 	return model
 
 
-def train_logisticregression_model(data, hyperparameters, task_name):
-	"""
-	Train a Logistic Regression model based on the task and hyperparameters.
-
-	Args:
-		data (list): List containing x_train, y_train, and sample_weight_train.
-		hyperparameters (dict): Hyperparameters for the Logistic Regression model.
-		task_name (str): Task name.
-
-	Returns:
-		model: Trained Logistic Regression model, or None if training fails.
-	"""
+def train_sklearn_model(model, data):
 	x_train, y_train, sample_weight_train = data
-	
-	model = LogisticRegression(**hyperparameters)
 	
 	try:
 		model.fit(x_train, y_train, sample_weight=sample_weight_train)
+	
 	except Exception as error:
 		model = None
 	
 	return model
 
 
-def train_multinomialnb_model(data, hyperparameters):
-	"""
-	Train a Multinomial Naive Bayes model.
-
-	Args:
-		data (list): List containing x_train, y_train, and sample_weight_train.
-		hyperparameters (dict): Hyperparameters for the Multinomial Naive Bayes model.
-
-	Returns:
-		model: Trained Multinomial Naive Bayes model.
-	"""
-	x_train, y_train, sample_weight_train = data
+def train_any_model(model_name, data, hyperparameters, task_name):
+	if model_name in ['lightgbm']:
+		model = LGBMRegressor(**hyperparameters) if task_name == 'regression' else LGBMClassifier(**hyperparameters)
+		return train_lightgbm_model(model, data)
 	
-	model = MultinomialNB(**hyperparameters)
-	model.fit(x_train, y_train, sample_weight=sample_weight_train)
-	return model
-
-
-def train_sgdlinear_model(data, hyperparameters, task_name):
-	"""
-	Train a SGD Linear model based on the task and hyperparameters.
-
-	Args:
-		data (list): List containing x_train, y_train, and sample_weight_train.
-		hyperparameters (dict): Hyperparameters for the SGD Linear model.
-		task_name (str): Task name.
-
-	Returns:
-		model: Trained SGD Linear model.
-	"""
-	x_train, y_train, sample_weight_train = data
+	data = data[: 3]
+	if model_name in ['multinomialnb']:
+		model = MultinomialNB(**hyperparameters)
 	
-	if task_name in ['regression']:
-		model = SGDRegressor(**hyperparameters)
+	elif model_name in ['sgdlinear']:
+		model = SGDRegressor(**hyperparameters) if task_name == 'regression' else SGDClassifier(**hyperparameters)
+	
+	elif model_name in ['elasticnet']:
+		model = ElasticNet(**hyperparameters)
+	
+	elif model_name in ['logisticregression']:
+		model = LogisticRegression(**hyperparameters)
+	
 	else:
-		model = SGDClassifier(**hyperparameters)
+		return None
 	
-	model.fit(x_train, y_train, sample_weight=sample_weight_train)
-	return model
+	return train_sklearn_model(model, data)
