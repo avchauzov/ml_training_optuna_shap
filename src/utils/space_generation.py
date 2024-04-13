@@ -57,6 +57,7 @@ def lightgbm_short_parameters(trial):
 	"""
 	return load_optuna_parameters('src/_settings/optimization_hyperparameters/lightgbm.json', 'short', trial)
 
+
 def load_optuna_parameters(file_path, _type, trial):
 	"""
 	Load parameters from a JSON file and convert them into Optuna suggest functions.
@@ -151,7 +152,6 @@ def set_lightgbm_production_mode_parameters(parameters, trial):
 
 
 # Function to generate LightGBM parameters for the 'long' configuration
-
 
 
 # Function to generate SGDLinear parameters for the 'long' configuration

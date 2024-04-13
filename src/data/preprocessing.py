@@ -60,9 +60,9 @@ def preprocess_data(data, index, scaler_name, model_name):
 	train_index, test_index = index
 	
 	preprocess_functions = {
-			'lightgbm'     : preprocess_data_lightgbm,
-			'multinomialnb': preprocess_data_multinomialnb,
-			'sgdlinear': preprocess_data_linear,
+			'lightgbm'          : preprocess_data_lightgbm,
+			'multinomialnb'     : preprocess_data_multinomialnb,
+			'sgdlinear'         : preprocess_data_linear,
 			'elasticnet'        : preprocess_data_linear,
 			'logisticregression': preprocess_data_linear
 			}

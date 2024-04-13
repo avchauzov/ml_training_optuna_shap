@@ -18,7 +18,7 @@ from src.utils.custom_metrics import s_mape
 METRICS = {
 		'neg_mean_absolute_error': ['minimize', mean_absolute_error],
 		'neg_mean_squared_error' : ['minimize', mean_squared_error],
-		'sMAPE': ['minimize', s_mape],
+		'sMAPE'                  : ['minimize', s_mape],
 		'neg_log_loss'           : ['minimize', log_loss],
 		'average_precision'      : ['maximize', lambda y_true, y_pred, sample_weight: average_precision_score(y_true=y_true, y_score=y_pred, sample_weight=sample_weight)],
 		'roc_auc'                : ['maximize', lambda y_true, y_pred, sample_weight: roc_auc_score(y_true=y_true, y_score=y_pred, sample_weight=sample_weight)],
