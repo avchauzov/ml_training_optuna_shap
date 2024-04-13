@@ -33,10 +33,10 @@ def generate_data_and_split(classification=True, n_classes=2):
 		tuple: Tuple containing x_data, y_data, and cross-validation fold indices (cv).
 	"""
 	if classification:
-		x_data, y_data = make_classification(n_samples=8096, n_features=8, n_informative=4, n_classes=n_classes)
+		x_data, y_data = make_classification(n_samples=8096, n_features=16, n_informative=8, n_classes=n_classes)
 	
 	else:
-		x_data, y_data = make_regression(n_samples=8096, n_features=8, n_informative=4)
+		x_data, y_data = make_regression(n_samples=8096, n_features=16, n_informative=8)
 	
 	x_data = pd.DataFrame(x_data)
 	

@@ -14,16 +14,6 @@ from src.models.training import train_any_model
 from src.utils.metric_calculation import calculate_test_error
 
 
-'''def calculate_error_metrics(errors):
-	train_error, test_error = errors
-	return {
-			'train_error_mean': np.nanmean(train_error),
-			'train_error_std' : np.nanstd(train_error),
-			'test_error_mean' : np.nanmean(test_error),
-			'test_error_std'  : np.nanstd(test_error),
-			}'''
-
-
 def calculate_shap_values(task_name, model_name, metric_name, data, index, error, hyperparameters, x_values, shap_values):
 	"""
 	Calculate SHAP values for feature selection.
@@ -86,14 +76,14 @@ def generate_report(error, selected, metric_name):
 	train_error, test_error = error
 	
 	report_df = pd.DataFrame()
-	report_df['Train Error'] = [np.nanmean(value) for value in train_error]
-	report_df['Test Error'] = [np.nanmean(value) for value in test_error]
-	report_df['Number of Columns'] = [len(value) for value in selected]
+	report_df['mean_train_error'] = [np.nanmean(value) for value in train_error]
+	report_df['mean_test_error'] = [np.nanmean(value) for value in test_error]
+	report_df['std_test_error'] = [np.nanstd(value) for value in test_error]
+	report_df['number_of_features'] = [len(value) for value in selected]
 	
-	direction = True if METRICS[metric_name][0] in ['minimize'] else False
-	report_df = report_df.sort_values(['Test Error', 'Number of Columns', 'Train Error'], ascending=[direction, True, direction])
+	direction = METRICS[metric_name][0] == 'minimize'
+	report_df = report_df.sort_values(['mean_test_error', 'std_test_error', 'number_of_features', 'mean_train_error'], ascending=[direction, True, True, direction])
 	
-	columns_to_select_list = sorted(report_df.index)
 	table = report_df.to_string(index=False, header=True, justify='center')
 	
 	# Add dashes before and after the table
