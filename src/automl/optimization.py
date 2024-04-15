@@ -123,6 +123,8 @@ def find_best_model(task_name, model_name, metric_name, x_data, y_data, weight_d
 	time.sleep(1)
 	print('\n')
 	
+	return best_hyperparameters, list(x_data)
+	
 	# Step 2: Feature selection
 	print('Step 2: Feature Selection')
 	time.sleep(1)

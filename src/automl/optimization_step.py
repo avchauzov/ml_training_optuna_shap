@@ -26,8 +26,6 @@ def perform_trial(data, cv, space, best_score_history, patience, task_name, mode
 	Returns:
 		tuple: Mean and standard deviation of test errors from cross-validation.
 	"""
-	x_data, y_data, weight_data = data
-	
 	if not validate_space(space, model_name):
 		raise optuna.TrialPruned()
 	
@@ -41,7 +39,7 @@ def perform_trial(data, cv, space, best_score_history, patience, task_name, mode
 		if best_score_history[-1] == best_score_history[-patience]:
 			raise optuna.TrialPruned()
 	
-	return calculate_cv_score([x_data, y_data, weight_data], cv, space, task_name, model_name, metric_name)
+	return calculate_cv_score(data, cv, space, task_name, model_name, metric_name)
 
 
 def validate_space(space, model_name):

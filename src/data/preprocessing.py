@@ -5,7 +5,7 @@ This module contains functions for data preprocessing.
 from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler, RobustScaler, StandardScaler
 
 
-def fill_and_scale_data(data, index, scaler_name=None, fillna=True):
+def fill_and_scale_data(data, index, fillna=True):
 	"""
 	Fill NaN values and scale data.
 
@@ -29,28 +29,45 @@ def fill_and_scale_data(data, index, scaler_name=None, fillna=True):
 		x_train = x_train.dropna(how='all', axis=1)
 		x_test = x_test.dropna(how='all', axis=1)
 	
-	if scaler_name:
-		scaler_functions = {
-				'MaxAbsScaler'  : MaxAbsScaler(),
-				'MinMaxScaler'  : MinMaxScaler(),
-				'RobustScaler'  : RobustScaler(),
-				'StandardScaler': StandardScaler()
-				}
-		scaler = scaler_functions.get(scaler_name)
-		x_train = scaler.fit_transform(x_train)
-		x_test = scaler.transform(x_test)
-	
 	return x_train, y_train, weight_train, x_test, y_test, weight_test
 
 
-def preprocess_data(data, index, scaler_name, model_name):
+def scale_data(data, scaler_name):
+	"""
+	Fill NaN values and scale data.
+
+	Args:
+		data (list): List containing x_data, y_data, and weight_data.
+		index (list): List containing train_index and test_index.
+		fillna (bool, optional): Whether to fill NaN values. Default is True.
+		scaler_name (str, optional): Name of the scaler to use. Default is None.
+
+	Returns:
+		tuple: A tuple containing x_train, y_train, weight_train, x_test, y_test, and weight_test.
+	"""
+	x_train, x_test = data
+	
+	scaler_functions = {
+			'MaxAbsScaler'  : MaxAbsScaler(),
+			'MinMaxScaler'  : MinMaxScaler(),
+			'RobustScaler'  : RobustScaler(),
+			'StandardScaler': StandardScaler()
+			}
+	
+	scaler = scaler_functions.get(scaler_name)
+	x_train = scaler.fit_transform(x_train)
+	x_test = scaler.transform(x_test)
+	
+	return x_train, x_test
+
+
+def preprocess_data(data, index, model_name):
 	"""
 	Preprocess data based on the specified model.
 
 	Args:
 		data (tuple): Tuple containing x_data, y_data, and weight_data.
 		index (tuple): Tuple containing train_index and test_index.
-		scaler_name (str): Name of the scaler to use.
 		model_name (str): Name of the model.
 
 	Returns:
@@ -68,7 +85,7 @@ def preprocess_data(data, index, scaler_name, model_name):
 			}
 	
 	preprocess_function = preprocess_functions[model_name]
-	return preprocess_function([x_data, y_data, weight_data], [train_index, test_index], scaler_name)
+	return preprocess_function([x_data, y_data, weight_data], [train_index, test_index])
 
 
 def preprocess_data_lightgbm(data, index, fillna=True):
@@ -86,7 +103,7 @@ def preprocess_data_lightgbm(data, index, fillna=True):
 	return fill_and_scale_data(data, index, fillna=fillna)
 
 
-def preprocess_data_linear(data, index, scaler_name, fillna=True):
+def preprocess_data_linear(data, index, fillna=True):
 	"""
 	Preprocess data for linear models.
 
@@ -94,12 +111,11 @@ def preprocess_data_linear(data, index, scaler_name, fillna=True):
 		data (list): List containing x_data, y_data, and weight_data.
 		index (list): List containing train_index and test_index.
 		fillna (bool, optional): Whether to fill NaN values. Default is True.
-		scaler_name (str, optional): Name of the scaler to use. Default is None.
 
 	Returns:
 		tuple: A tuple containing x_train, y_train, weight_train, x_test, y_test, and weight_test.
 	"""
-	return fill_and_scale_data(data, index, scaler_name, fillna=fillna)
+	return fill_and_scale_data(data, index, fillna=fillna)
 
 
 def preprocess_data_multinomialnb(data, index, fillna=True):

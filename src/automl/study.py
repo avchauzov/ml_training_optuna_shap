@@ -10,8 +10,20 @@ from optuna.trial import TrialState
 
 from src._settings.metrics import METRICS
 from src.automl.optimization_step import perform_trial
+from src.data.preprocessing import preprocess_data
 from src.utils.functions import update_dict
 from src.utils.parameter_generation import generate_hyperparameters
+
+
+def prepare_data(cv, data, model_name):
+	x_data, y_data, weight_data = data
+	
+	train_test_set = []
+	for train_index, test_index in cv:
+		x_train, y_train, weight_train, x_test, y_test, weight_test = preprocess_data([x_data, y_data, weight_data], [train_index, test_index], model_name)
+		train_test_set.append(([x_train, y_train, weight_train], [x_test, y_test, weight_test]))
+	
+	return train_test_set
 
 
 def optimize_hyperparameters(data, cv, hyperparameters, n_trials, patience, optimization_type, n_jobs, task_name, model_name, metric_name, test_mode):
@@ -34,7 +46,8 @@ def optimize_hyperparameters(data, cv, hyperparameters, n_trials, patience, opti
 	Returns:
 		dict: Best hyperparameters found during optimization.
 	"""
-	x_data, y_data, weight_data = data
+	train_test_set = prepare_data(cv, data, model_name)
+	
 	best_score = []
 	
 	def objective(trial):
@@ -54,10 +67,10 @@ def optimize_hyperparameters(data, cv, hyperparameters, n_trials, patience, opti
 			if trial.params == _trial.params:
 				return _trial.value
 		
-		space = generate_hyperparameters(task_name, model_name, metric_name, trial, optimization_type, len(np.unique(y_data)), n_jobs, test_mode)
+		space = generate_hyperparameters(task_name, model_name, metric_name, trial, optimization_type, len(np.unique(data[1])), n_jobs, test_mode)
 		space = update_dict(space, hyperparameters)
 		
-		mean_score, std_score = perform_trial([x_data, y_data, weight_data], cv, space, best_score, patience, task_name, model_name, metric_name, trial)
+		mean_score, std_score = perform_trial(train_test_set, cv, space, best_score, patience, task_name, model_name, metric_name, trial)
 		trial.set_user_attr('std_score', std_score)
 		
 		return mean_score
