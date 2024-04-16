@@ -26,8 +26,8 @@ def calculate_cv_score(data, cv, hyperparameters, task_name, model_name, metric_
 	"""
 	errors = []
 	for train_set, test_set in data:
-		x_train, y_train, weight_train = train_set
-		x_test, y_test, weight_test = test_set
+		x_train, y_train, weight_train, _ = train_set
+		x_test, y_test, weight_test, _ = test_set
 		
 		if 'scaler' in hyperparameters:
 			scaler_name = hyperparameters.get('scaler', None)

@@ -19,9 +19,9 @@ def prepare_data(cv, data, model_name):
 	x_data, y_data, weight_data = data
 	
 	train_test_set = []
-	for train_index, test_index in cv:
-		x_train, y_train, weight_train, x_test, y_test, weight_test = preprocess_data([x_data, y_data, weight_data], [train_index, test_index], model_name)
-		train_test_set.append(([x_train, y_train, weight_train], [x_test, y_test, weight_test]))
+	for index_train, index_test in cv:
+		x_train, y_train, weight_train, x_test, y_test, weight_test = preprocess_data([x_data, y_data, weight_data], [index_train, index_test], model_name)
+		train_test_set.append(([x_train, y_train, weight_train, index_train], [x_test, y_test, weight_test, index_test]))
 	
 	return train_test_set
 

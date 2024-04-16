@@ -9,40 +9,24 @@ import shap
 from tqdm import tqdm
 
 from src._settings.metrics import METRICS
-from src.data.preprocessing import preprocess_data
+from src.automl.study import prepare_data
+from src.data.preprocessing import scale_data
 from src.models.training import train_any_model
 from src.utils.metric_calculation import calculate_test_error
 
 
-def calculate_shap_values(task_name, model_name, metric_name, data, index, error, hyperparameters, x_values, shap_values):
-	"""
-	Calculate SHAP values for feature selection.
-
-	Args:
-		task_name (str): Name of the task.
-		model_name (str): Name of the model.
-		metric_name (str): Name of the metric.
-		data (list): List containing x_data, y_data, and weight_data.
-		index (list): List containing train_index and test_index.
-		error (list): List containing train_error and test_error.
-		hyperparameters: Hyperparameters for the model.
-		x_values (list): List to store input values.
-		shap_values (list): List to store SHAP values.
-
-	Returns:
-		None
-	"""
-	x_data, y_data, weight_data = data
-	train_index, test_index = index
+def calculate_shap_values(task_name, model_name, metric_name, data, selected, error, hyperparameters, x_values, shap_values):
+	train_set, test_set = data
+	x_train, y_train, weight_train, index_train = train_set
+	x_test, y_test, weight_test, index_test = test_set
 	train_error, test_error = error
 	
-	scaler_name = hyperparameters.get('scaler', None)
-	
 	if 'scaler' in hyperparameters:
+		scaler_name = hyperparameters.get('scaler', None)
 		del hyperparameters['scaler']
+		
+		x_train, x_test = scale_data([x_train, x_test], scaler_name)
 	
-	# Split data into training and test sets
-	x_train, y_train, weight_train, x_test, y_test, weight_test = preprocess_data([x_data, y_data, weight_data], [train_index, test_index], scaler_name, model_name)
 	model = train_any_model(model_name, [x_train, y_train, weight_train, x_test, y_test, weight_test], hyperparameters, task_name)
 	
 	train_error.append(calculate_test_error([x_train, y_train, weight_train], model, metric_name, task_name))
@@ -112,27 +96,27 @@ def select_important_features(data, cv, hyperparameters, drop_rate, min_columns_
 	Returns:
 		list: Sorted list of selected columns.
 	"""
-	x_data, y_data, weight_data = data
+	train_test_set = prepare_data(cv, data, model_name)
 	
-	if x_data.shape[1] <= min_columns_to_keep:
-		return sorted(list(x_data))
+	if data[0].shape[1] <= min_columns_to_keep:
+		return sorted(list(data[0]))
 	
-	selected_cv, to_drop_cv, iteration = [list(x_data)], [[]], 1
+	selected_cv, to_drop_cv, iteration = [list(data[0])], [[]], 1
 	train_error_cv, test_error_cv = [], []
-	selected, to_drop = list(x_data), []
+	selected, to_drop = list(data[0]), []
 	
 	with tqdm(total=len(selected) - min_columns_to_keep, position=0, dynamic_ncols=True) as pbar:
 		while len(selected) >= min_columns_to_keep:
 			train_error, test_error = [], []
 			_index, x_values, shap_values = [], [], []
 			
-			for index, (train_index, test_index) in enumerate(cv):
+			for index, (train_set, test_set) in enumerate(train_test_set):
 				calculate_shap_values(
 						task_name, model_name, metric_name,
-						[x_data[selected], y_data, weight_data], [train_index, test_index],
+						[train_set, test_set], selected,
 						[train_error, test_error], hyperparameters, x_values, shap_values
 						)
-				_index.extend(test_index)
+				_index.extend(test_set[3])
 			
 			train_error_cv.append(train_error)
 			test_error_cv.append(test_error)

@@ -6,18 +6,6 @@ from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler, RobustScaler, Stan
 
 
 def fill_and_scale_data(data, index, fillna=True):
-	"""
-	Fill NaN values and scale data.
-
-	Args:
-		data (list): List containing x_data, y_data, and weight_data.
-		index (list): List containing train_index and test_index.
-		fillna (bool, optional): Whether to fill NaN values. Default is True.
-		scaler_name (str, optional): Name of the scaler to use. Default is None.
-
-	Returns:
-		tuple: A tuple containing x_train, y_train, weight_train, x_test, y_test, and weight_test.
-	"""
 	x_train, y_train, weight_train, x_test, y_test, weight_test = split_data_by_index(data, index)
 	x_train, x_test = select_common_columns(x_train, x_test)
 	
@@ -33,18 +21,6 @@ def fill_and_scale_data(data, index, fillna=True):
 
 
 def scale_data(data, scaler_name):
-	"""
-	Fill NaN values and scale data.
-
-	Args:
-		data (list): List containing x_data, y_data, and weight_data.
-		index (list): List containing train_index and test_index.
-		fillna (bool, optional): Whether to fill NaN values. Default is True.
-		scaler_name (str, optional): Name of the scaler to use. Default is None.
-
-	Returns:
-		tuple: A tuple containing x_train, y_train, weight_train, x_test, y_test, and weight_test.
-	"""
 	x_train, x_test = data
 	
 	scaler_functions = {
@@ -62,19 +38,8 @@ def scale_data(data, scaler_name):
 
 
 def preprocess_data(data, index, model_name):
-	"""
-	Preprocess data based on the specified model.
-
-	Args:
-		data (tuple): Tuple containing x_data, y_data, and weight_data.
-		index (tuple): Tuple containing train_index and test_index.
-		model_name (str): Name of the model.
-
-	Returns:
-		tuple: A tuple containing x_train, y_train, weight_train, x_test, y_test, and weight_test.
-	"""
 	x_data, y_data, weight_data = data
-	train_index, test_index = index
+	index_train, index_test = index
 	
 	preprocess_functions = {
 			'lightgbm'          : preprocess_data_lightgbm,
@@ -85,51 +50,18 @@ def preprocess_data(data, index, model_name):
 			}
 	
 	preprocess_function = preprocess_functions[model_name]
-	return preprocess_function([x_data, y_data, weight_data], [train_index, test_index])
+	return preprocess_function([x_data, y_data, weight_data], [index_train, index_test])
 
 
 def preprocess_data_lightgbm(data, index, fillna=True):
-	"""
-	Preprocess data for LightGBM model.
-
-	Args:
-		data (list): List containing x_data, y_data, and weight_data.
-		index (list): List containing train_index and test_index.
-		fillna (bool, optional): Whether to fill NaN values. Default is True.
-
-	Returns:
-		tuple: A tuple containing x_train, y_train, weight_train, x_test, y_test, and weight_test.
-	"""
 	return fill_and_scale_data(data, index, fillna=fillna)
 
 
 def preprocess_data_linear(data, index, fillna=True):
-	"""
-	Preprocess data for linear models.
-
-	Args:
-		data (list): List containing x_data, y_data, and weight_data.
-		index (list): List containing train_index and test_index.
-		fillna (bool, optional): Whether to fill NaN values. Default is True.
-
-	Returns:
-		tuple: A tuple containing x_train, y_train, weight_train, x_test, y_test, and weight_test.
-	"""
 	return fill_and_scale_data(data, index, fillna=fillna)
 
 
 def preprocess_data_multinomialnb(data, index, fillna=True):
-	"""
-	Preprocess data for MultinomialNB model.
-
-	Args:
-		data (list): List containing x_data, y_data, and weight_data.
-		index (list): List containing train_index and test_index.
-		fillna (bool, optional): Whether to fill NaN values. Default is True.
-
-	Returns:
-		tuple: A tuple containing x_train, y_train, weight_train, x_test, y_test, and weight_test.
-	"""
 	return fill_and_scale_data(data, index, fillna=fillna)
 
 
@@ -151,27 +83,17 @@ def select_common_columns(x_train, x_test):
 
 
 def split_data_by_index(data, index):
-	"""
-	Split the data into training and test sets based on provided indices.
-
-	Args:
-		data (list): List containing x_data, y_data, and weight_data.
-		index (list): List containing train_index and test_index.
-
-	Returns:
-		tuple: A tuple containing x_train, y_train, weight_train, x_test, y_test, and weight_test.
-	"""
 	x_data, y_data, weight_data = data
-	train_index, test_index = index
+	index_train, index_test = index
 	
 	# Select training data
-	x_train = x_data.iloc[train_index]
-	y_train = y_data[train_index]
-	weight_train = weight_data[train_index]
+	x_train = x_data.iloc[index_train]
+	y_train = y_data[index_train]
+	weight_train = weight_data[index_train]
 	
 	# Select test data
-	x_test = x_data.iloc[test_index]
-	y_test = y_data[test_index]
-	weight_test = weight_data[test_index]
+	x_test = x_data.iloc[index_test]
+	y_test = y_data[index_test]
+	weight_test = weight_data[index_test]
 	
 	return x_train, y_train, weight_train, x_test, y_test, weight_test

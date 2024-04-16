@@ -43,11 +43,12 @@ def generate_data_and_split(classification=True, n_classes=2):
 	cv = []
 	if classification:
 		kf = StratifiedKFold(n_splits=3, shuffle=True)
+	
 	else:
 		kf = KFold(n_splits=3, shuffle=True)
 	
-	for train_index, test_index in kf.split(x_data, y_data):
-		cv.append((train_index, test_index))
+	for index_train, index_test in kf.split(x_data, y_data):
+		cv.append((index_train, index_test))
 	
 	return x_data, y_data, cv
 
