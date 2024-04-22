@@ -7,7 +7,6 @@ import os
 import random
 import sys
 
-import pandas as pd
 from sklearn.datasets import make_classification, make_regression
 from sklearn.model_selection import KFold, StratifiedKFold
 
@@ -38,8 +37,6 @@ def generate_data_and_split(classification=True, n_classes=2):
 	else:
 		x_data, y_data = make_regression(n_samples=8096, n_features=16, n_informative=8)
 	
-	x_data = pd.DataFrame(x_data)
-	
 	cv = []
 	if classification:
 		kf = StratifiedKFold(n_splits=3, shuffle=True)
@@ -61,8 +58,6 @@ def run_optimization_for_test(task_name, model_name, metric_name, x_data, y_data
 		task_name (str): Task name.
 		model_name (str): Model name.
 		metric_name (str): Metric name.
-		x_data (pd.DataFrame): Input optimization_hyperparameters.
-		y_data (pd.Series): Target labels.
 		cv (list): Cross-validation fold indices.
 
 	Returns:
@@ -188,7 +183,7 @@ def test_multinomialnb_classification_multiclass():
 	run_optimization_for_test(task_name, 'multinomialnb', metric_name, x_data.abs(), y_data, cv)
 
 
-'''test_elasticnet_regression()
+test_elasticnet_regression()
 test_lightgbm_classification_binary()
 test_lightgbm_classification_multiclass()
 test_lightgbm_regression()
@@ -197,4 +192,4 @@ test_logisticregression_classification_multiclass()
 test_sgdlinear_regression()
 test_sgdlinear_classification_binary()
 test_sgdlinear_classification_multiclass()
-test_multinomialnb_classification_multiclass()'''
+test_multinomialnb_classification_multiclass()

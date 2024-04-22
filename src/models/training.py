@@ -44,7 +44,7 @@ def train_sklearn_model(model, data):
 	try:
 		model.fit(x_train, y_train, sample_weight=sample_weight_train)
 	
-	except Exception as error:
+	except Exception as _:
 		model = None
 	
 	return model

@@ -4,7 +4,6 @@ This module contains functions for performing feature selection using SHAP value
 import time
 
 import numpy as np
-import pandas as pd
 import shap
 from tqdm import tqdm
 
@@ -15,7 +14,7 @@ from src.models.training import train_any_model
 from src.utils.metric_calculation import calculate_test_error
 
 
-def calculate_shap_values(task_name, model_name, metric_name, data, selected, error, hyperparameters, x_values, shap_values):
+def calculate_shap_values(task_name, model_name, metric_name, data, error, hyperparameters, x_values, shap_values):
 	train_set, test_set = data
 	x_train, y_train, weight_train, index_train = train_set
 	x_test, y_test, weight_test, index_test = test_set
@@ -59,24 +58,32 @@ def generate_report(error, selected, metric_name):
 	"""
 	train_error, test_error = error
 	
-	report_df = pd.DataFrame()
-	report_df['mean_train_error'] = [np.nanmean(value) for value in train_error]
-	report_df['mean_test_error'] = [np.nanmean(value) for value in test_error]
-	report_df['std_test_error'] = [np.nanstd(value) for value in test_error]
-	report_df['number_of_features'] = [len(value) for value in selected]
+	mean_train_error = [np.nanmean(value) for value in train_error]
+	mean_test_error = [np.nanmean(value) for value in test_error]
+	std_test_error = [np.nanstd(value) for value in test_error]
+	number_of_features = [len(value) for value in selected]
 	
 	direction = METRICS[metric_name][0] == 'minimize'
-	report_df = report_df.sort_values(['mean_test_error', 'std_test_error', 'number_of_features', 'mean_train_error'], ascending=[direction, True, True, direction])
+	sorted_indices = np.lexsort(
+			(
+					mean_train_error,
+					number_of_features,
+					std_test_error,
+					mean_test_error if direction else -mean_test_error,
+					)
+			)
 	
-	table = report_df.to_string(index=False, header=True, justify='center')
-	
-	# Add dashes before and after the table
-	dashes = '-' * len(table.split('\n')[0])
-	formatted_table = f'{dashes}\n{table}\n{dashes}'
+	table_rows = [
+			f'{mean_train_error[i]:.4f} | {mean_test_error[i]:.4f} | {std_test_error[i]:.4f} | {number_of_features[i]}'
+			for i in sorted_indices
+			]
+	table_header = 'Mean Train Error | Mean Test Error | Std Test Error | Number of Features'
+	formatted_table = f'{table_header}\n{"-" * len(table_header)}\n'
+	formatted_table += '\n'.join(table_rows)
 	
 	print(formatted_table)
 	
-	return selected[report_df.index[0]]
+	return selected[sorted_indices[0]]
 
 
 def select_important_features(data, cv, hyperparameters, drop_rate, min_columns_to_keep, task_name, model_name, metric_name):
@@ -113,8 +120,7 @@ def select_important_features(data, cv, hyperparameters, drop_rate, min_columns_
 			for index, (train_set, test_set) in enumerate(train_test_set):
 				calculate_shap_values(
 						task_name, model_name, metric_name,
-						[train_set, test_set], selected,
-						[train_error, test_error], hyperparameters, x_values, shap_values
+						[train_set, test_set], [train_error, test_error], hyperparameters, x_values, shap_values
 						)
 				_index.extend(test_set[3])
 			
@@ -124,27 +130,18 @@ def select_important_features(data, cv, hyperparameters, drop_rate, min_columns_
 			if len(selected) == min_columns_to_keep:
 				break
 			
-			shap_values_df = pd.DataFrame(shap_values, columns=selected, index=_index)
-			shap_values_df = shap_values_df.groupby(shap_values_df.index).agg(np.nanmean)
-			shap_values_df = np.abs(shap_values_df)
+			shap_values_mean = np.abs(shap_values).mean(axis=0)
+			shap_values_std = np.abs(shap_values).std(axis=0)
 			
-			shap_values_df = pd.concat(
-					[
-							pd.DataFrame(shap_values_df.std(axis=0).T, columns=['std_importance']),
-							pd.DataFrame(shap_values_df.mean(axis=0).T, columns=['mean_importance']),
-							pd.DataFrame(shap_values_df.max(axis=0).T, columns=['max_importance']),
-							],
-					axis=1
+			sorted_indices = np.argsort(
+					(-shap_values_mean, -np.max(shap_values_mean, axis=0), -shap_values_std), axis=0
 					)
+			sorted_indices = np.flip(sorted_indices, axis=0)
 			
-			shap_values_df = shap_values_df.sort_values(
-					['mean_importance', 'max_importance', 'std_importance'],
-					ascending=[False, False, False]
-					)
-			drop_count = int(np.ceil(shap_values_df.shape[0] * drop_rate))
+			drop_count = int(np.ceil(sorted_indices.shape[0] * drop_rate))
 			
-			important = sorted(shap_values_df.index.values[:-drop_count])
-			not_important = sorted(shap_values_df.index.values[-drop_count:])
+			important = sorted_indices[:-drop_count]
+			not_important = sorted_indices[-drop_count:]
 			
 			selected_cv.append(important)
 			to_drop_cv.append(not_important)

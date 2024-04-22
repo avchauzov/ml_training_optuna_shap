@@ -87,12 +87,12 @@ def split_data_by_index(data, index):
 	index_train, index_test = index
 	
 	# Select training data
-	x_train = x_data.iloc[index_train]
+	x_train = x_data[index_train]
 	y_train = y_data[index_train]
 	weight_train = weight_data[index_train]
 	
 	# Select test data
-	x_test = x_data.iloc[index_test]
+	x_test = x_data[index_test]
 	y_test = y_data[index_test]
 	weight_test = weight_data[index_test]
 	

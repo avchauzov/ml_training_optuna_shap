@@ -190,13 +190,12 @@ def sgdlinear_long_parameters(trial, loss, penalty, n_jobs, task_name):
 
 
 # Function to generate SGDLinear parameters for the 'short' configuration
-def sgdlinear_short_parameters(trial, task_name):
+def sgdlinear_short_parameters(trial):
 	"""
 	Generate SGDLinear parameters for the 'short' configuration based on trial suggestions.
 
 	Args:
 		trial: Trial object for optimization.
-		task_name (str): Task name.
 
 	Returns:
 		dict: Dictionary of SGDLinear hyperparameters.

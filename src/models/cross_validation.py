@@ -9,13 +9,12 @@ from src.models.training import train_any_model
 from src.utils.metric_calculation import calculate_test_error
 
 
-def calculate_cv_score(data, cv, hyperparameters, task_name, model_name, metric_name):
+def calculate_cv_score(data, hyperparameters, task_name, model_name, metric_name):
 	"""
 	Perform cross-validation and return the mean and standard deviation of the test errors.
 
 	Args:
 		data (list): List containing x_data, y_data, and weight_data.
-		cv (list): List of cross-validation fold indices.
 		hyperparameters (dict): Hyperparameters for the machine learning model.
 		task_name (str): Task name.
 		model_name (str): Model name.

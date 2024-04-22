@@ -97,8 +97,15 @@ def find_best_model(task_name, model_name, metric_name, x_data, y_data, weight_d
 	"""
 	_validate_task_model_metric(task_name, model_name, metric_name)
 	
+	if not isinstance(x_data, np.ndarray):
+		x_data = np.array(x_data)
+	
+	if not isinstance(y_data, np.ndarray):
+		y_data = np.array(y_data)
+	
 	if weight_data is None:
 		weight_data = np.ones(len(y_data))
+	
 	elif not isinstance(weight_data, np.ndarray):
 		weight_data = np.array(weight_data)
 	

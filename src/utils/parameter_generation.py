@@ -13,7 +13,7 @@ def generate_hyperparameters(task_name, model_name, metric_name, trial, optimiza
 			('lightgbm', 'long')           : lambda: lightgbm_long_parameters(trial, get_objective(model_name, task_name, metric_name), get_metric(task_name), task_name, num_class, n_jobs),
 			('lightgbm', 'short')          : lambda: lightgbm_short_parameters(trial),
 			('sgdlinear', 'long')          : lambda: sgdlinear_long_parameters(trial, get_loss(model_name, task_name), ['l2', 'l1', 'elasticnet'], n_jobs, optimization_type),
-			('sgdlinear', 'short')         : lambda: sgdlinear_short_parameters(trial, optimization_type),
+			('sgdlinear', 'short')         : lambda: sgdlinear_short_parameters(trial),
 			('elasticnet', 'long')         : lambda: elasticnet_long_parameters(trial),
 			('elasticnet', 'short')        : lambda: elasticnet_short_parameters(trial),
 			('logisticregression', 'long') : lambda: logisticregression_long_parameters(trial, n_jobs),
